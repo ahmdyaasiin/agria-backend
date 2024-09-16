@@ -14,16 +14,20 @@ func init() {
 func main() {
 	log := config.NewLogrus()
 	db := config.NewSQLX()
-	validator := config.NewValidator()
+	validator := config.NewValidator(db)
 	fiber := config.NewFiber()
 	redis := config.NewRedis()
+	facebookOAuth := config.NewOAuthFacebook()
+	googleOAuth := config.NewOAuthGoogle()
 
 	config.App(&config.AppConfig{
-		App:       fiber,
-		DB:        db,
-		Log:       log,
-		Validator: validator,
-		Redis:     redis,
+		App:           fiber,
+		DB:            db,
+		Log:           log,
+		Validator:     validator.Validate,
+		Redis:         redis,
+		FacebookOAuth: facebookOAuth,
+		GoogleOAuth:   googleOAuth,
 	})
 
 	appPort, err := strconv.Atoi(os.Getenv("APP_PORT"))
