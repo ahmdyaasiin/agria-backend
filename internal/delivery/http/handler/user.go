@@ -334,3 +334,51 @@ func (h *UserHandler) Login(ctx fiber.Ctx) error {
 		},
 	})
 }
+
+func (h *UserHandler) RenewAccessToken(ctx fiber.Ctx) error {
+	refreshToken := ctx.Cookies("refresh_token")
+
+	res, err := h.UserUserCase.RenewAccessToken(ctx.Context(), refreshToken)
+	if err != nil {
+		return err
+	}
+
+	return ctx.Status(fiber.StatusCreated).JSON(response.Final{
+		Message: "Renew access token successfully",
+		Data:    res,
+		Errors:  nil,
+		Status: response.Status{
+			Code:    fiber.StatusCreated,
+			Message: http.StatusText(fiber.StatusCreated),
+		},
+	})
+}
+
+func (h *UserHandler) Logout(ctx fiber.Ctx) error {
+	refreshToken := ctx.Cookies("refresh_token")
+
+	err := h.UserUserCase.Logout(ctx.Context(), refreshToken)
+	if err != nil {
+		return err
+	}
+
+	ctx.Cookie(&fiber.Cookie{
+		Name:     "refresh_token",
+		Value:    "",
+		Path:     "/",
+		Expires:  time.Now().Local().Add(-1 * time.Minute),
+		HTTPOnly: true,
+		Secure:   true,
+		SameSite: "Lax",
+	})
+
+	return ctx.Status(fiber.StatusOK).JSON(response.Final{
+		Message: "You have successfully logged out",
+		Data:    nil,
+		Errors:  nil,
+		Status: response.Status{
+			Code:    fiber.StatusOK,
+			Message: http.StatusText(fiber.StatusOK),
+		},
+	})
+}

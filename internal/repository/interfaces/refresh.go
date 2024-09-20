@@ -11,4 +11,7 @@ type RefreshRepository interface {
 	Read(tx *sqlx.Tx, key string, refresh *domain.Refresh) error
 	Update(tx *sqlx.Tx, refresh *domain.Refresh) error
 	Delete(tx *sqlx.Tx, refresh *domain.Refresh) error
+
+	Count(tx *sqlx.Tx, key string, total *int, refresh *domain.Refresh) error
+	ReadDESC(tx *sqlx.Tx, key string, refresh *domain.Refresh) error
 }

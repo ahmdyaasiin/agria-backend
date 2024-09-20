@@ -60,38 +60,63 @@ func (u *UserUseCase) FacebookCallBack(ctx context.Context, profile *response.Fe
 			return nil, ErrFRNotFacebookUser
 		}
 
-		accessToken, err := jwt.CreateToken(user.Username, false)
+		accessToken, err := jwt.CreateToken(user.ID, false)
 		if err != nil {
 			u.Log.Warnf("failed to create access token: %+v\n", err)
+			return nil, ErrFRCreateToken
+		}
+
+		refreshToken, err := jwt.CreateToken(user.ID, true)
+		if err != nil {
+			u.Log.Warnf("failed to create refresh token: %+v\n", err)
 			return nil, ErrFRCreateToken
 		}
 
 		refresh := &domain.Refresh{
 			UserID: user.ID,
 		}
-		err = u.RefreshRepository.Read(tx, "user_iD", refresh)
+
+		var total int
+		err = u.RefreshRepository.Count(tx, "user_iD", &total, refresh)
 		if err != nil {
-			u.Log.Warnf("failed to get refresh data: %+v\n", err)
-			return nil, ErrFailedToReadData
+			return nil, ErrFRFailedToReadData
 		}
 
-		refreshToken, err := jwt.CreateToken(user.Username, true)
-		if err != nil {
-			u.Log.Warnf("failed to create refresh token: %+v\n", err)
-			return nil, ErrCreateToken
-		}
+		now := time.Now().Local().UnixNano()
+		if total >= 5 {
+			// update the oldest refresh token
+			err = u.RefreshRepository.ReadDESC(tx, "user_iD", refresh)
+			if err != nil {
+				u.Log.Warnf("failed to get refresh data: %+v\n", err)
+				return nil, ErrFRFailedToReadData
+			}
 
-		refresh.Token = refreshToken
-		err = u.RefreshRepository.Update(tx, refresh)
-		if err != nil {
-			u.Log.Warnf("failed to store data (refresh): %+v\n", err)
-			return nil, ErrFailedToStoreData
+			refresh.Token = refreshToken
+			refresh.CreatedAt = now
+			refresh.LastRefreshAt = now
+
+			err = u.RefreshRepository.Update(tx, refresh)
+			if err != nil {
+				return nil, ErrFRFailedToUpdateData
+			}
+		} else {
+			// create refresh token and store to database
+
+			refresh.ID = uuid.NewString()
+			refresh.Token = refreshToken
+			refresh.CreatedAt = now
+			refresh.LastRefreshAt = now
+
+			err = u.RefreshRepository.Create(tx, refresh)
+			if err != nil {
+				return nil, ErrFRFailedToStoreData
+			}
 		}
 
 		err = tx.Commit()
 		if err != nil {
 			u.Log.Warnf("failed to commit transaction: %+v\n", err)
-			return nil, ErrFailedToStoreData
+			return nil, ErrFRFailedToStoreData
 		}
 
 		res.IsRegistered = true
@@ -101,7 +126,7 @@ func (u *UserUseCase) FacebookCallBack(ctx context.Context, profile *response.Fe
 
 		user.ID = uuid.NewString()
 		user.Name = profile.Name
-		user.UrlPhoto = profile.Picture.Data.URL
+		user.PhotoUrl = profile.Picture.Data.URL
 		user.Status = "identity-card-verification-needed"
 		user.IsFacebook = true
 
@@ -143,38 +168,63 @@ func (u *UserUseCase) GoogleCallBack(ctx context.Context, profile *response.Fetc
 			return nil, ErrFRNotGoogleUser
 		}
 
-		accessToken, err := jwt.CreateToken(user.Username, false)
+		accessToken, err := jwt.CreateToken(user.ID, false)
 		if err != nil {
 			u.Log.Warnf("failed to create access token: %+v\n", err)
+			return nil, ErrFRCreateToken
+		}
+
+		refreshToken, err := jwt.CreateToken(user.ID, true)
+		if err != nil {
+			u.Log.Warnf("failed to create refresh token: %+v\n", err)
 			return nil, ErrFRCreateToken
 		}
 
 		refresh := &domain.Refresh{
 			UserID: user.ID,
 		}
-		err = u.RefreshRepository.Read(tx, "user_iD", refresh)
+
+		var total int
+		err = u.RefreshRepository.Count(tx, "user_iD", &total, refresh)
 		if err != nil {
-			u.Log.Warnf("failed to get refresh data: %+v\n", err)
-			return nil, ErrFailedToReadData
+			return nil, ErrFRFailedToReadData
 		}
 
-		refreshToken, err := jwt.CreateToken(user.Username, true)
-		if err != nil {
-			u.Log.Warnf("failed to create refresh token: %+v\n", err)
-			return nil, ErrCreateToken
-		}
+		now := time.Now().Local().UnixNano()
+		if total >= 5 {
+			// update the oldest refresh token
+			err = u.RefreshRepository.ReadDESC(tx, "user_iD", refresh)
+			if err != nil {
+				u.Log.Warnf("failed to get refresh data: %+v\n", err)
+				return nil, ErrFRFailedToReadData
+			}
 
-		refresh.Token = refreshToken
-		err = u.RefreshRepository.Update(tx, refresh)
-		if err != nil {
-			u.Log.Warnf("failed to store data (refresh): %+v\n", err)
-			return nil, ErrFailedToStoreData
+			refresh.Token = refreshToken
+			refresh.CreatedAt = now
+			refresh.LastRefreshAt = now
+
+			err = u.RefreshRepository.Update(tx, refresh)
+			if err != nil {
+				return nil, ErrFRFailedToUpdateData
+			}
+		} else {
+			// create refresh token and store to database
+
+			refresh.ID = uuid.NewString()
+			refresh.Token = refreshToken
+			refresh.CreatedAt = now
+			refresh.LastRefreshAt = now
+
+			err = u.RefreshRepository.Create(tx, refresh)
+			if err != nil {
+				return nil, ErrFRFailedToStoreData
+			}
 		}
 
 		err = tx.Commit()
 		if err != nil {
 			u.Log.Warnf("failed to commit transaction: %+v\n", err)
-			return nil, ErrFailedToStoreData
+			return nil, ErrFRFailedToStoreData
 		}
 
 		res.IsRegistered = true
@@ -184,7 +234,7 @@ func (u *UserUseCase) GoogleCallBack(ctx context.Context, profile *response.Fetc
 
 		user.ID = uuid.NewString()
 		user.Name = profile.Name
-		user.UrlPhoto = profile.Picture
+		user.PhotoUrl = profile.Picture
 		user.Status = "identity-card-verification-needed"
 		user.IsGoogle = true
 
@@ -304,23 +354,22 @@ func (u *UserUseCase) RegisterWithOAuth(ctx context.Context, req *request.Finish
 
 	res := new(response.FinishRegister)
 
-	jwtAccessToken, err := jwt.CreateToken(user.Username, false)
+	jwtAccessToken, err := jwt.CreateToken(user.ID, false)
 	if err != nil {
 		u.Log.Warnf("failed to create access token: %+v\n", err)
-		return nil, ErrFRCreateToken
+		return nil, ErrCreateToken
 	}
 
-	jwtRefreshToken, err := jwt.CreateToken(user.Username, true)
+	jwtRefreshToken, err := jwt.CreateToken(user.ID, true)
 	if err != nil {
 		u.Log.Warnf("failed to create refresh token: %+v\n", err)
-		return nil, ErrFRCreateToken
+		return nil, ErrCreateToken
 	}
 
 	refresh := &domain.Refresh{
 		ID:            uuid.NewString(),
 		Token:         jwtRefreshToken,
 		CreatedAt:     now,
-		UpdatedAt:     now,
 		LastRefreshAt: now,
 		UserID:        user.ID,
 	}
@@ -380,7 +429,7 @@ func (u *UserUseCase) RegisterWithEmailPassword(ctx context.Context, req *reques
 	user.Name = req.Name
 	user.Password = string(password)
 	user.Status = "email-verification-needed"
-	user.UrlPhoto = "https://example.com/default-profile-picture.jpg"
+	user.PhotoUrl = "https://example.com/default-profile-picture.jpg"
 	user.CreatedAt = now
 	user.UpdatedAt = now
 
@@ -539,23 +588,22 @@ func (u *UserUseCase) VerifySixCode(ctx context.Context, req *request.FinishRegi
 	now := time.Now().Local().UnixNano()
 	res := new(response.FinishRegister)
 
-	jwtAccessToken, err := jwt.CreateToken(user.Username, false)
+	jwtAccessToken, err := jwt.CreateToken(user.ID, false)
 	if err != nil {
 		u.Log.Warnf("failed to create access token: %+v\n", err)
-		return nil, ErrFRCreateToken
+		return nil, ErrCreateToken
 	}
 
-	jwtRefreshToken, err := jwt.CreateToken(user.Username, true)
+	jwtRefreshToken, err := jwt.CreateToken(user.ID, true)
 	if err != nil {
 		u.Log.Warnf("failed to create refresh token: %+v\n", err)
-		return nil, ErrFRCreateToken
+		return nil, ErrCreateToken
 	}
 
 	refresh := &domain.Refresh{
 		ID:            uuid.NewString(),
 		Token:         jwtRefreshToken,
 		CreatedAt:     now,
-		UpdatedAt:     now,
 		LastRefreshAt: now,
 		UserID:        user.ID,
 	}
@@ -610,32 +658,57 @@ func (u *UserUseCase) Login(ctx context.Context, req *request.Login) (*response.
 
 	res := new(response.FinishRegister)
 
-	accessToken, err := jwt.CreateToken(user.Username, false)
+	accessToken, err := jwt.CreateToken(user.ID, false)
 	if err != nil {
 		u.Log.Warnf("failed to create access token: %+v\n", err)
-		return nil, ErrFRCreateToken
+		return nil, ErrCreateToken
 	}
 
-	refresh := &domain.Refresh{
-		UserID: user.ID,
-	}
-	err = u.RefreshRepository.Read(tx, "user_iD", refresh)
-	if err != nil {
-		u.Log.Warnf("failed to get refresh data: %+v\n", err)
-		return nil, ErrFailedToReadData
-	}
-
-	refreshToken, err := jwt.CreateToken(user.Username, true)
+	refreshToken, err := jwt.CreateToken(user.ID, true)
 	if err != nil {
 		u.Log.Warnf("failed to create refresh token: %+v\n", err)
 		return nil, ErrCreateToken
 	}
 
-	refresh.Token = refreshToken
-	err = u.RefreshRepository.Update(tx, refresh)
+	refresh := &domain.Refresh{
+		UserID: user.ID,
+	}
+
+	var total int
+	err = u.RefreshRepository.Count(tx, "user_iD", &total, refresh)
 	if err != nil {
-		u.Log.Warnf("failed to store data (refresh): %+v\n", err)
-		return nil, ErrFailedToStoreData
+		return nil, ErrFailedToReadData
+	}
+
+	now := time.Now().Local().UnixNano()
+	if total >= 5 {
+		// update the oldest refresh token
+		err = u.RefreshRepository.ReadDESC(tx, "user_iD", refresh)
+		if err != nil {
+			u.Log.Warnf("failed to get refresh data: %+v\n", err)
+			return nil, ErrFailedToReadData
+		}
+
+		refresh.Token = refreshToken
+		refresh.CreatedAt = now
+		refresh.LastRefreshAt = now
+
+		err = u.RefreshRepository.Update(tx, refresh)
+		if err != nil {
+			return nil, ErrFailedToUpdateData
+		}
+	} else {
+		// create refresh token and store to database
+
+		refresh.ID = uuid.NewString()
+		refresh.Token = refreshToken
+		refresh.CreatedAt = now
+		refresh.LastRefreshAt = now
+
+		err = u.RefreshRepository.Create(tx, refresh)
+		if err != nil {
+			return nil, ErrFailedToStoreData
+		}
 	}
 
 	err = tx.Commit()
@@ -648,4 +721,91 @@ func (u *UserUseCase) Login(ctx context.Context, req *request.Login) (*response.
 	res.RefreshToken = refresh.Token
 
 	return res, nil
+}
+
+func (u *UserUseCase) RenewAccessToken(ctx context.Context, refreshToken string) (*response.FinishRegister, error) {
+	tx, err := u.DB.Beginx()
+	defer tx.Rollback()
+	if err != nil {
+		u.Log.Warnf("create transaction: %+v\n", err)
+		return nil, ErrCreateDatabaseTransaction
+	}
+
+	_, err = jwt.ValidateToken(refreshToken, true)
+	if err != nil {
+		u.Log.Warnf("failed to validate token: %+v\n", err)
+		return nil, ErrInvalidToken
+	}
+
+	refresh := &domain.Refresh{
+		Token: refreshToken,
+	}
+
+	err = u.RefreshRepository.Read(tx, "token", refresh)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		u.Log.Warnf("failed to read data (refresh): %+v\n", err)
+		return nil, ErrFailedToReadData
+	}
+
+	if refresh.ID == "" {
+		return nil, ErrInvalidToken
+	}
+
+	refresh.LastRefreshAt = time.Now().Local().UnixNano()
+
+	err = u.RefreshRepository.Update(tx, refresh)
+	if err != nil {
+		return nil, ErrFailedToUpdateData
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		u.Log.Warnf("failed to commit transaction: %+v\n", err)
+		return nil, ErrFailedToStoreData
+	}
+
+	res := new(response.FinishRegister)
+
+	accessToken, err := jwt.CreateToken(refresh.UserID, false)
+	if err != nil {
+		u.Log.Warnf("failed to create access token: %+v\n", err)
+		return nil, ErrCreateToken
+	}
+
+	res.AccessToken = accessToken
+
+	return res, nil
+}
+
+func (u *UserUseCase) Logout(ctx context.Context, refreshToken string) error {
+	tx, err := u.DB.Beginx()
+	defer tx.Rollback()
+	if err != nil {
+		u.Log.Warnf("create transaction: %+v\n", err)
+		return ErrCreateDatabaseTransaction
+	}
+
+	_, err = jwt.ValidateToken(refreshToken, true)
+	if err != nil {
+		u.Log.Warnf("failed to validate token: %+v\n", err)
+		return ErrInvalidToken
+	}
+
+	refresh := &domain.Refresh{
+		Token: refreshToken,
+	}
+
+	err = u.RefreshRepository.Read(tx, "token", refresh)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		u.Log.Warnf("failed to read data (refresh): %+v\n", err)
+		return ErrFailedToReadData
+	}
+
+	err = u.RefreshRepository.Delete(tx, refresh)
+	if err != nil {
+		u.Log.Warnf("failed to delete data (refresh): %+v\n", err)
+		return ErrFailedToClearData
+	}
+
+	return nil
 }

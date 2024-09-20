@@ -25,7 +25,6 @@ func CreateQueryBuilder(entity TableInterface) string {
 }
 
 func ReadQueryBuilder(entity TableInterface, key string) string {
-
 	query := "SELECT "
 
 	entityValue := reflect.ValueOf(entity).Elem()
@@ -66,6 +65,41 @@ func UpdateQueryBuilder(entity TableInterface) string {
 func DeleteQueryBuilder(entity TableInterface) string {
 	tableName := entity.TableName()
 	return fmt.Sprintf("DELETE FROM %s WHERE id = :id", tableName)
+}
+
+func CountQueryBuilder(entity TableInterface, key string) string {
+
+	query := fmt.Sprintf("SELECT COUNT(*) FROM %s", entity.TableName())
+
+	if key != "" {
+		query += fmt.Sprintf(" WHERE %s = :%s", key, key)
+	}
+
+	return query
+}
+
+func ReadDESCQueryBuilder(entity TableInterface, key string) string {
+	query := "SELECT "
+
+	entityValue := reflect.ValueOf(entity).Elem()
+	entityType := entityValue.Type()
+	tableName := entity.TableName()
+
+	var columns []string
+	for i := 0; i < entityType.NumField(); i++ {
+		field := entityType.Field(i)
+
+		columns = append(columns, fmt.Sprintf("IFNULL(%s, '') AS %s", field.Tag.Get("db"), field.Tag.Get("db")))
+	}
+
+	query += fmt.Sprintf("%s FROM %s ", strings.Join(columns, ", "), tableName)
+	if key != "" {
+		query += fmt.Sprintf("WHERE %s = :%s", key, key)
+	}
+
+	query += " ORDER BY created_at DESC"
+
+	return query
 }
 
 func GetValueByKey(entity interface{}, key string) (interface{}, error) {

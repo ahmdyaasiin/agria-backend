@@ -10,7 +10,7 @@ type User struct {
 	Status      string `json:"status" db:"status"`
 	IsGoogle    bool   `json:"is_google" db:"is_google"`
 	IsFacebook  bool   `json:"is_facebook" db:"is_facebook"`
-	UrlPhoto    string `json:"url_photo" db:"url_photo"`
+	PhotoUrl    string `json:"photo_url" db:"photo_url"`
 	CreatedAt   int64  `json:"created_at" db:"created_at"`
 	UpdatedAt   int64  `json:"updated_at" db:"updated_at"`
 }

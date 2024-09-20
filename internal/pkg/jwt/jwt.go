@@ -9,7 +9,12 @@ import (
 
 var secretKey = []byte(os.Getenv("SECRET_KEY_JWT_ACCESS_TOKEN"))
 
-func CreateToken(username string, isRefreshToken bool) (string, error) {
+type customClaims struct {
+	UserID string
+	jwt.RegisteredClaims
+}
+
+func CreateToken(id string, isRefreshToken bool) (string, error) {
 	if isRefreshToken {
 		secretKey = []byte(os.Getenv("SECRET_KEY_JWT_REFRESH_TOKEN"))
 	}
@@ -24,9 +29,9 @@ func CreateToken(username string, isRefreshToken bool) (string, error) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"iss":        "agria-backend",
-		"sub":        username,
+		"sub":        id,
 		"exp":        exp,
-		"iat":        now,
+		"iat":        now.Unix(),
 		"role":       "user",
 		"is_refresh": isRefreshToken,
 	})
@@ -39,22 +44,27 @@ func CreateToken(username string, isRefreshToken bool) (string, error) {
 	return tokenString, nil
 }
 
-func ValidateToken(tokenString string, isRefreshToken bool) error {
+func ValidateToken(tokenString string, isRefreshToken bool) (string, error) {
 	if isRefreshToken {
 		secretKey = []byte(os.Getenv("SECRET_KEY_JWT_REFRESH_TOKEN"))
 	}
 
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &customClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return secretKey, nil
 	})
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	if !token.Valid {
-		return fmt.Errorf("invalid token")
+		return "", fmt.Errorf("invalid token")
 	}
 
-	return nil
+	claims, ok := token.Claims.(*customClaims)
+	if !ok {
+		return "", fmt.Errorf("could not parse claims")
+	}
+
+	return claims.UserID, nil
 }

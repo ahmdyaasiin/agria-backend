@@ -10,12 +10,14 @@ var (
 	ErrFRNotGoogleUser             = fiber.NewError(fiber.StatusConflict, "account+registered+using+Google.+Please+login+using+Google.")
 	ErrFRCreateToken               = fiber.NewError(fiber.StatusInternalServerError, "failed+to+create+token")
 	ErrFRFailedToStoreData         = fiber.NewError(fiber.StatusInternalServerError, "failed+to+store+data")
+	ErrFRFailedToUpdateData        = fiber.NewError(fiber.StatusInternalServerError, "failed+to+update+data")
 )
 
 var (
 	ErrCreateDatabaseTransaction = fiber.NewError(fiber.StatusInternalServerError, "failed to create database transaction")
 	ErrFailedToReadData          = fiber.NewError(fiber.StatusInternalServerError, "failed to get data from database")
 	ErrInvalidToken              = fiber.NewError(fiber.StatusUnauthorized, "invalid token")
+	ErrExpiredToken              = fiber.NewError(fiber.StatusUnauthorized, "expired token")
 	ErrFailedToUnMarshal         = fiber.NewError(fiber.StatusInternalServerError, "failed to unmarshal")
 	ErrDuplicateUser             = fiber.NewError(fiber.StatusConflict, "duplicate user")
 	ErrFailedToClearData         = fiber.NewError(fiber.StatusInternalServerError, "failed to clear data")

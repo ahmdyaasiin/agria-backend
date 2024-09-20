@@ -54,3 +54,53 @@ func (r *RefreshRepository) Delete(tx *sqlx.Tx, refresh *domain.Refresh) error {
 	_, err := tx.NamedExec(query.DeleteQueryBuilder(refresh), refresh)
 	return err
 }
+
+func (r *RefreshRepository) Count(tx *sqlx.Tx, key string, total *int, refresh *domain.Refresh) error {
+	q := query.CountQueryBuilder(refresh, key)
+
+	value, err := query.GetValueByKey(refresh, key)
+	if err != nil {
+		return err
+	}
+
+	param := map[string]any{
+		key: value,
+	}
+
+	stmt, err := tx.PrepareNamed(q)
+	if err != nil {
+		return err
+	}
+
+	err = stmt.Get(total, param)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *RefreshRepository) ReadDESC(tx *sqlx.Tx, key string, refresh *domain.Refresh) error {
+	q := query.ReadDESCQueryBuilder(refresh, key)
+
+	value, err := query.GetValueByKey(refresh, key)
+	if err != nil {
+		return err
+	}
+
+	param := map[string]any{
+		key: value,
+	}
+
+	stmt, err := tx.PrepareNamed(q)
+	if err != nil {
+		return err
+	}
+
+	err = stmt.Get(refresh, param)
+	if err != nil {
+		return err
+	}
+
+	return err
+}

@@ -18,4 +18,6 @@ type UserUseCase interface {
 	VerifySixCode(ctx context.Context, req *request.FinishRegister) (*response.FinishRegister, error)
 
 	Login(ctx context.Context, req *request.Login) (*response.FinishRegister, error)
+	RenewAccessToken(ctx context.Context, refreshToken string) (*response.FinishRegister, error)
+	Logout(ctx context.Context, refreshToken string) error
 }

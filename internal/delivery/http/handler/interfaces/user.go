@@ -18,4 +18,6 @@ type UserHandler interface {
 	RegisterComplete(ctx fiber.Ctx) error
 
 	Login(ctx fiber.Ctx) error
+	Logout(ctx fiber.Ctx) error
+	RenewAccessToken(ctx fiber.Ctx) error
 }

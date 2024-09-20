@@ -30,4 +30,8 @@ func NewUserRoutes(route fiber.Router, userHandler interfaces.UserHandler) {
 
 	auth.Post("/register/complete", userHandler.RegisterComplete)
 
+	auth.Get("/renew-access-token", userHandler.RenewAccessToken)
+
+	auth.Get("/logout", userHandler.Logout)
+
 }
