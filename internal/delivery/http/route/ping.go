@@ -2,7 +2,6 @@ package route
 
 import (
 	"github.com/gofiber/fiber/v3"
-	"net/http"
 )
 
 func NewPingRoute(route fiber.Router) {
@@ -10,6 +9,6 @@ func NewPingRoute(route fiber.Router) {
 		return c.SendString("pong")
 	})
 	route.Get("/error", func(c fiber.Ctx) error {
-		return fiber.NewError(fiber.StatusInternalServerError, http.StatusText(fiber.StatusInternalServerError))
+		return fiber.NewError(fiber.StatusInternalServerError, "route for error test")
 	})
 }

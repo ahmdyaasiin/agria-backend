@@ -1,0 +1,40 @@
+name: Agria Deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Add SSH key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Deploy to Server
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.USERNAME }}@${{ secrets.HOST }} -p ${{ secrets.PORT }} << 'EOF'
+            echo "Navigating to application directory..."
+            mkdir -p ~/app/agria-backend
+            cd ~/app/agria-backend
+
+            echo "Stashing changes and pulling latest code from main..."
+            git stash
+            git pull origin main
+
+            echo "Building Go application..."
+            export PATH=$PATH:/usr/local/go/bin
+            CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o agria-backend ./cmd/app
+
+            echo "Restarting Go application service..."
+            sudo systemctl restart agria-backend.service
+
+            echo "Reloading Nginx to apply changes..."
+            sudo nginx -s reload
+          EOF
