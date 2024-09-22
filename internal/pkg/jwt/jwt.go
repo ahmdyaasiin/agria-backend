@@ -7,16 +7,18 @@ import (
 	"time"
 )
 
-var secretKey = []byte(os.Getenv("SECRET_KEY_JWT_ACCESS_TOKEN"))
+var secretKey []byte
 
 type customClaims struct {
-	UserID string
+	UserID string `json:"sub"`
 	jwt.RegisteredClaims
 }
 
 func CreateToken(id string, isRefreshToken bool) (string, error) {
 	if isRefreshToken {
 		secretKey = []byte(os.Getenv("SECRET_KEY_JWT_REFRESH_TOKEN"))
+	} else {
+		secretKey = []byte(os.Getenv("SECRET_KEY_JWT_ACCESS_TOKEN"))
 	}
 
 	now := time.Now().Local()
@@ -47,6 +49,8 @@ func CreateToken(id string, isRefreshToken bool) (string, error) {
 func ValidateToken(tokenString string, isRefreshToken bool) (string, error) {
 	if isRefreshToken {
 		secretKey = []byte(os.Getenv("SECRET_KEY_JWT_REFRESH_TOKEN"))
+	} else {
+		secretKey = []byte(os.Getenv("SECRET_KEY_JWT_ACCESS_TOKEN"))
 	}
 
 	token, err := jwt.ParseWithClaims(tokenString, &customClaims{}, func(token *jwt.Token) (interface{}, error) {
