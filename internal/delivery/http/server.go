@@ -7,16 +7,24 @@ import (
 )
 
 type Config struct {
-	App         *fiber.App
-	Middleware  fiber.Handler
-	Cors        fiber.Handler
-	UserHandler interfaces.UserHandler
+	App                    *fiber.App
+	AuthUserMiddleware     fiber.Handler
+	OptionalAuthMiddleware fiber.Handler
+	CorsMiddleware         fiber.Handler
+	HTTPMiddleware         fiber.Handler
+	UserHandler            interfaces.UserHandler
+	ProductHandler         interfaces.ProductHandler
+	CartHandler            interfaces.CartHandler
+	WishlistHandler        interfaces.WishlistHandler
 }
 
 func (c *Config) Start() {
+	c.App.Use(c.CorsMiddleware)
+	c.App.Use(c.HTTPMiddleware)
+
 	v1 := c.App.Group("/v1")
 
 	route.NewPingRoute(v1)
-	route.NewUserRoutes(v1, c.UserHandler)
+	route.NewUserRoutes(v1, c.UserHandler, c.ProductHandler, c.CartHandler, c.WishlistHandler, c.AuthUserMiddleware, c.OptionalAuthMiddleware)
 	route.NewAdminRoutes(v1.Group("/admin"))
 }

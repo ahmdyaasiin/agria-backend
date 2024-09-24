@@ -22,6 +22,7 @@ func (r *AddressRepository) Create(tx *sqlx.Tx, address *domain.Address) error {
 
 func (r *AddressRepository) Read(tx *sqlx.Tx, key string, address *domain.Address) error {
 	q := query.ReadQueryBuilder(address, key)
+	q += " AND is_primary = 1"
 
 	value, err := query.GetValueByKey(address, key)
 	if err != nil {

@@ -6,8 +6,6 @@ import (
 	"github.com/ahmdyaasiin/agria-backend/internal/pkg/validation"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v3"
-	"github.com/gofiber/fiber/v3/middleware/cors"
-	"github.com/gofiber/fiber/v3/middleware/logger"
 	"net/http"
 	"os"
 )
@@ -18,17 +16,6 @@ func NewFiber() *fiber.App {
 		AppName:      os.Getenv("APP_NAME"),
 		ErrorHandler: NewErrorHandler(),
 	})
-
-	app.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:8000"},
-		AllowCredentials: true,
-	}))
-
-	app.Use(logger.New(logger.Config{
-		Format:     "${method} ${path} ${status} - ${time} - ${latency}\n",
-		TimeFormat: "15:04:05 Jan 2 2006",
-		TimeZone:   "Local",
-	}))
 
 	return app
 }
