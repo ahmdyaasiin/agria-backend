@@ -26,17 +26,11 @@ func NewUserRoutes(route fiber.Router, userHandler interfaces.UserHandler, produ
 	auth.Get("/logout", userHandler.Logout)
 
 	product := route.Group("/product")
+	product.Get("/cart", cartHandler.GetMyCart, authMiddleware)
+	product.Put("/cart", cartHandler.ManageCart, authMiddleware)
+	product.Get("/wishlist", wishlistHandler.GetMyWishlist, authMiddleware)
+	product.Put("/wishlist", wishlistHandler.ManageWishlists, authMiddleware)
 	product.Get("/:categoryName?", productHandler.GetProducts, optionalAuthMiddleware)
 	product.Get("/:productID/details", productHandler.GetProductDetails, optionalAuthMiddleware)
 	product.Get("/:productID/reviews", productHandler.GetProductReviews, optionalAuthMiddleware)
-
-	cart := route.Group("/cart")
-	cart.Use(authMiddleware)
-	cart.Get("/", cartHandler.GetMyCart)
-	cart.Put("/", cartHandler.ManageCart)
-
-	wishlist := route.Group("/wishlist")
-	wishlist.Use(authMiddleware)
-	wishlist.Get("/", wishlistHandler.GetMyWishlist)
-	wishlist.Put("/", wishlistHandler.ManageWishlists)
 }
