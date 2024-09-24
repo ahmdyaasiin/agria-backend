@@ -23,10 +23,15 @@ type CartUseCase struct {
 	Log            *logrus.Logger
 	Redis          *redis.Client
 	CartRepository repositoryInterface.CartRepository
+	ProductUseCase repositoryInterface.ProductRepository
 }
 
-func NewCartUseCase(DB *sqlx.DB, log *logrus.Logger, redis *redis.Client, cartRepository repositoryInterface.CartRepository) interfaces.CartUseCase {
-	return &CartUseCase{DB: DB, Log: log, Redis: redis, CartRepository: cartRepository}
+func NewCartUseCase(DB *sqlx.DB,
+	log *logrus.Logger,
+	redis *redis.Client,
+	cartRepository repositoryInterface.CartRepository,
+	productRepository repositoryInterface.ProductRepository) interfaces.CartUseCase {
+	return &CartUseCase{DB: DB, Log: log, Redis: redis, CartRepository: cartRepository, ProductUseCase: productRepository}
 }
 
 func (u *CartUseCase) GetMyCart(ctx context.Context, userID string) (*response.MyCart, error) {
@@ -112,7 +117,16 @@ func (u *CartUseCase) ManageCart(ctx context.Context, userID string, req *reques
 		return nil, ErrFailedToReadData
 	}
 
-	if req.Quantity > cart.Quantity {
+	product := &domain.Product{
+		ID: req.ProductID,
+	}
+	err = u.ProductUseCase.Read(tx, "iD", product)
+	if err != nil {
+		u.Log.Warnf("failed to read data (product): %+v\n", err)
+		return nil, ErrFailedToReadData
+	}
+
+	if req.Quantity > product.Quantity {
 		return nil, ErrOutOfStock
 	}
 

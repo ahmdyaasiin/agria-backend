@@ -39,7 +39,7 @@ func App(c *AppConfig) {
 	// usecases
 	userUseCase := usecase.NewUserUseCase(c.DB, c.Log, c.Redis, userRepository, addressRepository, refreshRepository)
 	productUseCase := usecase.NewProductUseCase(c.DB, c.Log, c.Redis, addressRepository, productRepository, productMediaRepository, ratingRepository)
-	cartUseCase := usecase.NewCartUseCase(c.DB, c.Log, c.Redis, cartRepository)
+	cartUseCase := usecase.NewCartUseCase(c.DB, c.Log, c.Redis, cartRepository, productRepository)
 	wishlistUseCase := usecase.NewWishlistUseCase(c.DB, c.Log, c.Redis, wishlistRepository)
 
 	// handler
