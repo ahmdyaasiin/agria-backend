@@ -325,12 +325,12 @@ func (h *UserHandler) Login(ctx fiber.Ctx) error {
 	})
 
 	return ctx.Status(fiber.StatusCreated).JSON(response.Final{
-		Message: "Account created successfully",
+		Message: "Account login successfully",
 		Data:    res,
 		Errors:  nil,
 		Status: response.Status{
-			Code:    fiber.StatusCreated,
-			Message: http.StatusText(fiber.StatusCreated),
+			Code:    fiber.StatusOK,
+			Message: http.StatusText(fiber.StatusOK),
 		},
 	})
 }
