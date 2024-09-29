@@ -5,6 +5,25 @@ type GetProductWithPagination struct {
 	Pagination
 }
 
+type GetPropertiesWithPagination struct {
+	Properties []GetProperties `json:"properties"`
+	Pagination
+}
+
+type GetProperties struct {
+	//
+	ID                string  `json:"id" db:"id"`
+	Name              string  `json:"name" db:"name"`
+	CategoryName      string  `json:"category_name" db:"category_name"`
+	City              string  `json:"city" db:"city"`
+	Price             int64   `json:"price" db:"price"`
+	Width             int     `json:"width" db:"width"`
+	CertificationType string  `json:"certification_type" db:"certification_type"`
+	PhotoUrl          string  `json:"photo_url" db:"photo_url"`
+	Ratings           float32 `json:"ratings" db:"ratings"`
+	IsWishlisted      bool    `json:"is_wishlisted" db:"is_wishlisted"`
+}
+
 type GetProduct struct {
 	ID              string  `json:"id" db:"id"`
 	Name            string  `json:"name" db:"name"`
@@ -50,6 +69,72 @@ type GetProductDetails struct {
 	CreatedAt  int64  `json:"-" db:"created_at"`
 	UpdatedAt  int64  `json:"-" db:"updated_at"`
 	CategoryID string `json:"-" db:"category_id"`
+}
+
+type GetPropertyDetails struct {
+	//
+	ID            string `json:"id" db:"id"`
+	Name          string `json:"name" db:"name"`
+	Description   string `json:"description" db:"description"`
+	Price         int64  `json:"price" db:"price"`
+	CategoryName  string `json:"category_name" db:"category_name"`
+	Width         int    `json:"width" db:"width"`
+	Province      string `json:"province" db:"province"`
+	City          string `json:"city" db:"city"`
+	OwnershipType string `json:"ownership_type" db:"ownership_type"`
+	NameOfOwner   string `json:"name_of_owner" db:"name_of_owner"`
+	PhotoUrl      string `json:"photo_url" db:"photo_url"`
+
+	//
+	DiscountPrice     int64                `json:"discount_price" db:"discount_price"`
+	InWishlist        bool                 `json:"in_wishlist" db:"in_wishlist"`
+	PhotoUrls         []string             `json:"photo_urls" db:"photo_urls"`
+	RatingsAndReviews []RatingProperty     `json:"ratings_and_reviews"`
+	Discuss           []PropertyDiscuss    `json:"discuss"`
+	Highlights        []PropertyHighlights `json:"highlights"`
+}
+
+type RatingAndReviewsProperty struct {
+	//
+	CountRatings       int              `json:"count_ratings"`
+	CountStarBreakDown []int            `json:"count_star_break_down"`
+	Data               []RatingProperty `json:"data"`
+}
+
+type RatingProperty struct {
+	ID              string   `json:"id" db:"id"`
+	Name            string   `json:"name" db:"name"`
+	PhotoUrl        string   `json:"photo_url" db:"photo_url"`
+	Content         string   `json:"content" db:"content"`
+	CountHelpful    int      `json:"count_helpful" db:"count_helpful"`
+	IsHelpful       bool     `json:"is_helpful" db:"is_helpful"`
+	PhotoUrls       []string `json:"photo_urls" db:"photo_urls"`
+	PhotoUrlsString string   `json:"-" db:"photo_urls_string"`
+}
+
+type PropertyDiscuss struct {
+	//
+	ID            string                   `json:"id" db:"id"`
+	Name          string                   `json:"name" db:"name"`
+	Content       string                   `json:"content" db:"content"`
+	PhotoUrl      string                   `json:"photo_url" db:"photo_url"`
+	Answers       []PropertyDiscussReplies `json:"answers"`
+	AnswersString string                   `json:"-" db:"answers_string"`
+}
+
+type PropertyDiscussReplies struct {
+	//
+	ID       string `json:"id" db:"id"`
+	Name     string `json:"name" db:"name"`
+	Content  string `json:"content" db:"content"`
+	PhotoUrl string `json:"photo_url" db:"photo_url"`
+	IsOwner  bool   `json:"is_owner"`
+}
+
+type PropertyHighlights struct {
+	//
+	Name     string `json:"name" db:"name"`
+	PhotoUrl string `json:"photo_url" db:"photo_url"`
 }
 
 type ReviewDetails struct {

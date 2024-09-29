@@ -1,6 +1,20 @@
 package repository
 
 var (
+	QueryGetPropertyDetails    = "SELECT p.id, p.name, p.price, p.description, p.width, p.state as province, p.city, p.certification_type as ownership_type, IFNULL((SELECT 1 FROM property_wishlist pw WHERE pw.property_id = p.id AND pw.user_id = :user_id), 0) as in_wishlist, c.name as category_name, u.name as name_of_owner, u.photo_url FROM properties p INNER JOIN categories c on p.category_id = c.id INNER JOIN users u on p.user_id = u.id WHERE p.id = :property_id"
+	QueryGetPropertyHighlights = "SELECT h.name, h.photo_url FROM property_highlights ph INNER JOIN highlights h on ph.highlight_id = h.id WHERE ph.property_id = :property_id"
+	QueryGetPropertyMedia      = "SELECT pm.photo_url FROM property_media pm WHERE pm.property_id = :property_id"
+	QueryGetPropertyDiscuss    = "SELECT d.id, d.content, u.name, u.photo_url, (SELECT GROUP_CONCAT(d2.id, '_', d2.content, '_', u2.name, '_', u2.photo_url, '_', (CASE WHEN u2.id = p.user_id THEN 1 ELSE 0 END), '$$$$$$$$$$$$$$$$$$' ORDER BY d2.created_at) FROM discussions d2 INNER JOIN properties p on d2.property_id = p.id INNER JOIN users u2 on d2.user_id = u2.id WHERE d2.discussion_id != '' AND d2.discussion_id IS NOT NULL) as answers_string FROM discussions d INNER JOIN users u on d.user_id = u.id WHERE d.property_id = :property_id AND d.discussion_id = '' OR d.discussion_id IS NULL"
+	QueryGetPropertyRatings    = "SELECT pr.id, u.name, u.photo_url, pr.content, IFNULL((SELECT 1 FROM property_rating_helpfuls prh WHERE prh.property_rating_id = pr.id AND prh.user_id = :user_id), 0) as is_helpful, (SELECT COUNT(*) FROM property_rating_helpfuls prh WHERE prh.property_rating_id = pr.id) as count_helpful, (SELECT GROUP_CONCAT(prm.photo_url) FROM property_rating_media prm WHERE prm.property_rating_id = pr.id) as photo_urls_string FROM property_ratings pr INNER JOIN users u on pr.user_id = u.id INNER JOIN property_transactions pt on pr.property_transaction_id = pt.id WHERE pt.property_id = :property_id"
+)
+
+var (
+	QueryGetAllPropertiesWithoutCondition1 = "SELECT p.id, p.name, c.name as category_name, p.city, p.price, p.width, p.certification_type, (SELECT IFNULL(AVG(pr.star), 0) FROM property_ratings pr INNER JOIN property_transactions pt on pr.property_transaction_id = pt.id WHERE pt.property_id = p.id) as ratings, (SELECT pm.photo_url FROM property_media pm WHERE pm.property_id = p.id ORDER BY pm.created_at LIMIT 1) as photo_url"
+	QueryGetAllPropertiesWithoutCondition2 = " FROM properties p INNER JOIN categories c on p.category_id = c.id WHERE 1=1"
+	QueryAdditionalForGetAllProperties     = ", IFNULL((SELECT 1 FROM property_wishlist pw WHERE pw.property_id = p.id AND pw.user_id = :user_id), 0) as is_wishlisted"
+)
+
+var (
 	QueryGetAllProductsWithoutCondition1 = "SELECT p.*, c.name as category_name, (SELECT IFNULL(AVG(r.star), 0) FROM ratings r INNER JOIN transaction_items t on r.transaction_item_id = t.id WHERE t.product_id = p.id) as ratings, (SELECT pm.photo_url FROM product_media pm WHERE pm.product_id = p.id ORDER BY c.created_at LIMIT 1) as photo_url, (SELECT GROUP_CONCAT('discount_product_id_', p2.id) FROM products p2 WHERE p.quantity > 0 GROUP BY p.id) as product_id_string"
 	QueryGetAllProductsWithoutCondition2 = " FROM products p INNER JOIN categories c ON p.category_id = c.id WHERE p.quantity > 0"
 	QueryAdditionalForGetAllProducts     = ", IFNULL((SELECT 1 FROM wishlist w WHERE w.product_id = p.id AND w.user_id = :user_id), 0) as is_wishlisted"
@@ -16,6 +30,8 @@ var (
 	QueryGetSpecificProductInCart        = "SELECT * FROM carts c WHERE product_id = :product_id AND user_id = :user_id"
 	QueryGetMyWishlist                   = "SELECT p.id as product_id, w.id, p.name, p.price, c.name as category_name, (SELECT IFNULL(AVG(r.star), 0) FROM ratings r INNER JOIN transaction_items t on r.transaction_item_id = t.id WHERE t.product_id = p.id) as ratings, (SELECT pm.photo_url FROM product_media pm WHERE pm.product_id = p.id ORDER BY c.created_at LIMIT 1) as photo_url, (SELECT GROUP_CONCAT('discount_product_id_', w2.product_id) FROM wishlist w2 WHERE w.user_id = w2.user_id GROUP BY c.id) as product_id_string FROM wishlist w INNER JOIN products p on w.product_id = p.id INNER JOIN categories c on p.category_id = c.id WHERE w.user_id = :user_id"
 	QueryGetSpecificProductInWishlist    = "SELECT * FROM wishlist w WHERE user_id = :user_id AND product_id = :product_id"
+	QueryGetSpecificPropertyInWishlist   = "SELECT * FROM property_wishlist pw WHERE user_id = :user_id AND property_id = :property_id"
 	QueryCountRatings                    = "SELECT COUNT(*) FROM ratings r INNER JOIN transaction_items ti on r.transaction_item_id = ti.id WHERE ti.product_id = :product_id"
 	QueryRatingBreakdown                 = "SELECT r.star, COUNT(*) as total FROM ratings r INNER JOIN transaction_items ti on r.transaction_item_id = ti.id WHERE ti.product_id = :product_id GROUP BY r.star ORDER BY r.star"
+	QueryGetMyPropertiesWishlist         = "SELECT p.id, p.name as name, (SELECT pm.photo_url FROM property_media pm WHERE pm.property_id = p.id ORDER BY pm.created_at LIMIT 1) as photo_url, (SELECT IFNULL(AVG(pr.star), 0) FROM property_ratings pr INNER JOIN property_transactions pt on pr.property_transaction_id = pt.id WHERE pt.property_id = p.id) as ratings, c.name as category_name, p.price, p.certification_type, p.width, p.city, p.state, (SELECT GROUP_CONCAT('discount_property_id_', pw2.property_id) FROM property_wishlist pw2 WHERE pw.user_id = pw2.user_id GROUP BY c.id) as product_id_string FROM property_wishlist pw INNER JOIN properties p on pw.property_id = p.id INNER JOIN categories c on p.category_id = c.id LEFT JOIN property_transactions pt on p.id = pt.property_id WHERE pt.status IS NULL OR pt.status = 'done' AND pw.user_id = :user_id"
 )

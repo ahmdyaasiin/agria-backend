@@ -57,12 +57,63 @@ func (r *WishlistRepository) GetSpecificProduct(tx *sqlx.Tx, userID, productID s
 	return err
 }
 
+func (r *WishlistRepository) GetMyWishlistsProperty(tx *sqlx.Tx, userID string, wishlists *[]response.MyWishlistProperties) error {
+	q := QueryGetMyPropertiesWishlist
+
+	param := map[string]any{
+		"user_id": userID,
+	}
+
+	stmt, err := tx.PrepareNamed(q)
+	if err != nil {
+		return err
+	}
+
+	err = stmt.Select(wishlists, param)
+	if err != nil {
+		return err
+	}
+
+	return err
+}
+
+func (r *WishlistRepository) GetSpecificProperty(tx *sqlx.Tx, userID, propertyID string, wishlist *domain.PropertyWishlist) error {
+	q := QueryGetSpecificPropertyInWishlist
+
+	param := map[string]any{
+		"user_id":     userID,
+		"property_id": propertyID,
+	}
+
+	stmt, err := tx.PrepareNamed(q)
+	if err != nil {
+		return err
+	}
+
+	err = stmt.Get(wishlist, param)
+	if err != nil {
+		return err
+	}
+
+	return err
+}
+
 func (r *WishlistRepository) Create(tx *sqlx.Tx, wishlist *domain.Wishlist) error {
 	_, err := tx.NamedExec(query.CreateQueryBuilder(wishlist), wishlist)
 	return err
 }
 
 func (r *WishlistRepository) Delete(tx *sqlx.Tx, wishlist *domain.Wishlist) error {
+	_, err := tx.NamedExec(query.DeleteQueryBuilder(wishlist), wishlist)
+	return err
+}
+
+func (r *WishlistRepository) CreateProperty(tx *sqlx.Tx, wishlist *domain.PropertyWishlist) error {
+	_, err := tx.NamedExec(query.CreateQueryBuilder(wishlist), wishlist)
+	return err
+}
+
+func (r *WishlistRepository) DeleteProperty(tx *sqlx.Tx, wishlist *domain.PropertyWishlist) error {
 	_, err := tx.NamedExec(query.DeleteQueryBuilder(wishlist), wishlist)
 	return err
 }

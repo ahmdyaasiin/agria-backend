@@ -35,18 +35,23 @@ func App(c *AppConfig) {
 	ratingRepository := repository.NewRatingRepository(c.DB)
 	cartRepository := repository.NewCartRepository(c.DB)
 	wishlistRepository := repository.NewWishlistRepository(c.DB)
+	propertyRepository := repository.NewPropertyRepository(c.DB)
+	propertyRatingRepository := repository.NewPropertyRatingRepository(c.DB)
+	discussRepository := repository.NewDiscussRepository(c.DB)
 
 	// usecases
 	userUseCase := usecase.NewUserUseCase(c.DB, c.Log, c.Redis, userRepository, addressRepository, refreshRepository)
 	productUseCase := usecase.NewProductUseCase(c.DB, c.Log, c.Redis, addressRepository, productRepository, productMediaRepository, ratingRepository)
 	cartUseCase := usecase.NewCartUseCase(c.DB, c.Log, c.Redis, cartRepository, productRepository)
 	wishlistUseCase := usecase.NewWishlistUseCase(c.DB, c.Log, c.Redis, wishlistRepository)
+	propertyUseCase := usecase.NewPropertyUseCase(c.DB, c.Log, c.Redis, propertyRepository, propertyRatingRepository, discussRepository, wishlistRepository)
 
 	// handler
 	userHandler := handler.NewUserHandler(c.Log, c.Validator, c.FacebookOAuth, c.GoogleOAuth, userUseCase)
 	productHandler := handler.NewProductHandler(c.Log, c.Validator, productUseCase)
 	cartHandler := handler.NewCartHandler(c.Log, c.Validator, cartUseCase)
 	wishlistHandler := handler.NewWishHandler(c.Log, c.Validator, wishlistUseCase)
+	propertyHandler := handler.NewPropertyHandler(c.Log, c.Validator, propertyUseCase)
 
 	// middleware
 	authUserMiddleware := middleware.Auth(c.Log)
@@ -64,6 +69,7 @@ func App(c *AppConfig) {
 		OptionalAuthMiddleware: optionalAuthMiddleware,
 		CorsMiddleware:         corsMiddleware,
 		HTTPMiddleware:         httpMiddleware,
+		PropertyHandler:        propertyHandler,
 	}
 
 	server.Start()

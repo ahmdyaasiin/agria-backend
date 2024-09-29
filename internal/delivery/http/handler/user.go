@@ -218,7 +218,7 @@ func (h *UserHandler) RegisterWithEmailPassword(ctx fiber.Ctx) error {
 	}
 
 	return ctx.Status(fiber.StatusOK).JSON(response.Final{
-		Message: "The code has been sent to your email.",
+		Message: "The code has been sent to your email",
 		Data:    nil,
 		Errors:  nil,
 		Status: response.Status{
@@ -247,7 +247,7 @@ func (h *UserHandler) SendVerificationCodeForRegister(ctx fiber.Ctx) error {
 	}
 
 	return ctx.Status(fiber.StatusOK).JSON(response.Final{
-		Message: "The code has been sent to your email.",
+		Message: "The code has been sent to your email",
 		Data:    nil,
 		Errors:  nil,
 		Status: response.Status{
@@ -348,8 +348,8 @@ func (h *UserHandler) RenewAccessToken(ctx fiber.Ctx) error {
 		Data:    res,
 		Errors:  nil,
 		Status: response.Status{
-			Code:    fiber.StatusCreated,
-			Message: http.StatusText(fiber.StatusCreated),
+			Code:    fiber.StatusOK,
+			Message: http.StatusText(fiber.StatusOK),
 		},
 	})
 }
@@ -377,8 +377,8 @@ func (h *UserHandler) Logout(ctx fiber.Ctx) error {
 		Data:    nil,
 		Errors:  nil,
 		Status: response.Status{
-			Code:    fiber.StatusOK,
-			Message: http.StatusText(fiber.StatusOK),
+			Code:    fiber.StatusNoContent,
+			Message: http.StatusText(fiber.StatusNoContent),
 		},
 	})
 }

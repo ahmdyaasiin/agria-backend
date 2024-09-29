@@ -5,7 +5,14 @@ import (
 	"github.com/gofiber/fiber/v3"
 )
 
-func NewUserRoutes(route fiber.Router, userHandler interfaces.UserHandler, productHandler interfaces.ProductHandler, cartHandler interfaces.CartHandler, wishlistHandler interfaces.WishlistHandler, authMiddleware fiber.Handler, optionalAuthMiddleware fiber.Handler) {
+func NewUserRoutes(route fiber.Router,
+	userHandler interfaces.UserHandler,
+	productHandler interfaces.ProductHandler,
+	cartHandler interfaces.CartHandler,
+	wishlistHandler interfaces.WishlistHandler,
+	propertyHandler interfaces.PropertyHandler,
+	authMiddleware fiber.Handler,
+	optionalAuthMiddleware fiber.Handler) {
 	route.Get("/hello", func(ctx fiber.Ctx) error {
 		return ctx.SendString("hello user!")
 	})
@@ -23,7 +30,7 @@ func NewUserRoutes(route fiber.Router, userHandler interfaces.UserHandler, produ
 	auth.Post("/register/send", userHandler.SendVerificationCodeForRegister)
 	auth.Post("/register/complete", userHandler.RegisterComplete)
 	auth.Get("/renew-access-token", userHandler.RenewAccessToken)
-	auth.Get("/logout", userHandler.Logout)
+	auth.Delete("/logout", userHandler.Logout)
 
 	product := route.Group("/product")
 	product.Get("/cart", cartHandler.GetMyCart, authMiddleware)
@@ -33,4 +40,13 @@ func NewUserRoutes(route fiber.Router, userHandler interfaces.UserHandler, produ
 	product.Get("/:categoryName?", productHandler.GetProducts, optionalAuthMiddleware)
 	product.Get("/:productID/details", productHandler.GetProductDetails, optionalAuthMiddleware)
 	product.Get("/:productID/reviews", productHandler.GetProductReviews, optionalAuthMiddleware)
+
+	property := route.Group("/property")
+	property.Get("/wishlist", propertyHandler.GetMyWishlistProperties, authMiddleware)
+	property.Put("/wishlist", propertyHandler.ManageWishlistsProperties, authMiddleware)
+	property.Get("/:categoryName?", propertyHandler.GetProperties, optionalAuthMiddleware)
+	property.Get("/:propertyID/details", propertyHandler.GetPropertyDetails, optionalAuthMiddleware)
+	property.Get("/:propertyID/reviews", propertyHandler.GetPropertyReviews, optionalAuthMiddleware)
+	property.Get("/:propertyID/discuss", propertyHandler.GetPropertyDiscuss, optionalAuthMiddleware)
+	property.Post("/:propertyID/discuss", propertyHandler.AddPropertyDiscuss, authMiddleware)
 }
