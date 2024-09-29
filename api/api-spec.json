@@ -1,15 +1,1984 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "Title",
-    "description": "Title",
+    "title": "Agria - Open API",
+    "description": "Lorem ipsum odor amet, consectetuer adipiscing elit. Proin mattis molestie ut urna egestas amet nam. Dapibus parturient ante per vestibulum eleifend cubilia eros urna vivamus. Mauris viverra in finibus efficitur facilisis consectetur inceptos sociosqu vestibulum. Fames libero sodales orci leo semper magna. Curabitur quam sem phasellus; at augue scelerisque lectus cras efficitur. Duis eros vel cursus ad habitant orci. Potenti dui vitae duis sit placerat; lobortis eu ullamcorper. Facilisi velit facilisis potenti metus class. Proin faucibus mauris odio nunc ultrices amet vel justo.",
     "version": "1.0.0"
   },
   "servers": [
     {
-      "url": "https"
+      "url": "https://agria-backend.iyh.me/v1"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "AccessToken": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Add prefix of Bearer before access token Ex: \"Bearer {access_token}\""
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Ping Server",
+      "description": ""
+    },
+    {
+      "name": "Authentication",
+      "description": ""
+    },
+    {
+      "name": "Menu",
+      "description": ""
+    },
+    {
+      "name": "Product",
+      "description": ""
+    },
+    {
+      "name": "Property",
+      "description": ""
+    },
+    {
+      "name": "Education",
+      "description": "Isn't fix yet"
+    },
+    {
+      "name": "Transaction",
+      "description": ""
+    },
+    {
+      "name": "Payment",
+      "description": ""
     }
   ],
   "paths": {
+    "/payment/property": {
+      "get": {
+        "tags": ["Payment"],
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Payment"],
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+
+            }
+          }
+        }
+      }
+    },
+    "/payment/product": {
+      "get": {
+        "tags": ["Payment"],
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Payment"],
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+
+            }
+          }
+        }
+      }
+    },
+
+
+    "/transaction/property": {
+      "get": {
+        "tags": ["Transaction"],
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+
+            }
+          }
+        }
+      }
+    },
+    "/transaction/property/{propertyID}/details": {
+      "get": {
+        "tags": ["Transaction"],
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+
+            }
+          }
+        }
+      }
+    },
+    "/transaction/product": {
+      "get": {
+        "tags": ["Transaction"],
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+
+            }
+          }
+        }
+      }
+    },
+    "/transaction/product/{produtID}/details": {
+      "get": {
+        "tags": ["Transaction"],
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+
+            }
+          }
+        }
+      }
+    },
+
+
+    "/property/wishlist": {
+      "get": {
+        "tags": ["Property"],
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Get wishlist successfully",
+                  "data": {
+                    "user_details": {
+                      "is_logged_in": true,
+                      "count_cart": 3,
+                      "count_notification": 1,
+                      "photo_profile": "string"
+                    },
+                    "properties": [
+                      {
+                        "name": "string",
+                        "category_name": "string",
+                        "star": 4.5,
+                        "city": "string",
+                        "price": 4500000,
+                        "width": 900,
+                        "ownership_type": "SHM",
+                        "photo_url": "string",
+                        "in_wishlist": true
+                      },
+                      {
+                        "name": "string",
+                        "category_name": "string",
+                        "star": 4.5,
+                        "city": "string",
+                        "price": 4500000,
+                        "width": 900,
+                        "ownership_type": "SHM",
+                        "photo_url": "string",
+                        "in_wishlist": true
+                      }
+                    ],
+                    "pagination": {
+                      "page": 1,
+                      "count_page": 4,
+                      "count_items": 40
+                    }
+                  },
+                  "errors": null,
+                  "status": {
+                    "code": 200,
+                    "message": "OK"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["Property"],
+        "description": "",
+        "requestBody": {
+          "required": true,
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "property_id": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "property_id": "string"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Manage wishlist successfully",
+                  "data": {
+                    "property_id": "string",
+                    "in_wishlist": true
+                  },
+                  "errors": null,
+                  "status": {
+                    "code": 200,
+                    "message": "OK"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/product/wishlist": {
+      "get": {
+        "tags": ["Product"],
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Get wishlist successfully",
+                  "data": {
+                    "user_details": {
+                      "is_logged_in": true,
+                      "count_cart": 3,
+                      "count_notification": 1,
+                      "photo_profile": "string"
+                    },
+                    "products": [
+                      {
+                        "product_id": "string",
+                        "id": "string",
+                        "name": "string",
+                        "price": 15000,
+                        "discount_price": 10000,
+                        "category_name": "string",
+                        "ratings": 4.5,
+                        "photo_url": "string"
+                      },
+                      {
+                        "product_id": "string",
+                        "id": "string",
+                        "name": "string",
+                        "price": 15000,
+                        "discount_price": 10000,
+                        "category_name": "string",
+                        "ratings": 4.5,
+                        "photo_url": "string"
+                      }
+                    ],
+                    "pagination": {
+                      "page": 1,
+                      "count_page": 4,
+                      "count_items": 40
+                    }
+                  },
+                  "errors": null,
+                  "status": {
+                    "code": 200,
+                    "message": "OK"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["Product"],
+        "description": "",
+        "requestBody": {
+          "required": true,
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "product_id": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "product_id": "string"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Manage wishlist successfully",
+                  "data": {
+                    "product_id": "string",
+                    "in_wishlist": true
+                  },
+                  "errors": null,
+                  "status": {
+                    "code": 200,
+                    "message": "OK"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/product/cart": {
+      "get": {
+        "tags": ["Product"],
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Get cart successfully",
+                  "data": {
+                    "user_details": {
+                      "is_logged_in": true,
+                      "count_cart": 3,
+                      "count_notification": 1,
+                      "photo_profile": "string"
+                    },
+                    "available": [
+                      {
+                        "id": "string",
+                        "product_id": "string",
+                        "name": "string",
+                        "price": 30000,
+                        "discount_price": 15000,
+                        "quantity": 3,
+                        "photo_url": "string"
+                      },
+                      {
+                        "id": "string",
+                        "product_id": "string",
+                        "name": "string",
+                        "price": 30000,
+                        "discount_price": 15000,
+                        "quantity": 3,
+                        "photo_url": "string"
+                      }
+                    ],
+                    "unavailable": [
+                      {
+                        "id": "string",
+                        "product_id": "string",
+                        "name": "string",
+                        "price": 30000,
+                        "discount_price": 15000,
+                        "quantity": 3,
+                        "photo_url": "string"
+                      },
+                      {
+                        "id": "string",
+                        "product_id": "string",
+                        "name": "string",
+                        "price": 30000,
+                        "discount_price": 15000,
+                        "quantity": 3,
+                        "photo_url": "string"
+                      }
+                    ],
+                    "pagination": {
+                      "page": 1,
+                      "count_page": 4,
+                      "count_items": 40
+                    }
+                  },
+                  "errors": null,
+                  "status": {
+                    "code": 200,
+                    "message": "OK"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["Product"],
+        "description": "",
+        "requestBody": {
+          "required": true,
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "product_id": {
+                    "type": "string"
+                  },
+                  "quantity": {
+                    "type": "number"
+                  }
+                }
+              },
+              "example": {
+                "product_id": "string",
+                "quantity": 10
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Manage cart successfully",
+                  "data": {
+                    "cart": {
+                      "product_id": "string",
+                      "quantity": 10
+                    }
+                  },
+                  "errors": null,
+                  "status": {
+                    "code": 200,
+                    "message": "OK"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+
+    "/education/{categoryName}": {
+      "get": {
+        "tags": ["Education"],
+        "description": "",
+        "responses": {
+
+        }
+      }
+    },
+    "/education/{articleID}/details": {
+      "get": {
+        "tags": ["Education"],
+        "description": "",
+        "responses": {
+
+        }
+      }
+    },
+    "/education/{articleID}/likes": {
+      "post": {
+        "tags": ["Education"],
+        "description": "",
+        "responses": {
+
+        }
+      }
+    },
+    "/education/{articleID}/comments": {
+      "get": {
+        "tags": ["Education"],
+        "description": "",
+        "responses": {
+
+        }
+      },
+      "post": {
+        "tags": ["Education"],
+        "description": "",
+        "responses": {
+
+        }
+      }
+    },
+
+
+    "/property/{categoryName}":{
+      "get": {
+        "tags": ["Property"],
+        "description": "",
+        "parameters": [
+          {
+            "name": "sort_by",
+            "in": "query",
+            "example": "newest"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "example": 1
+          },
+          {
+            "name": "province",
+            "in": "query",
+            "example": "Jawa Timur"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Get property successfully",
+                  "data": {
+                    "user_details": {
+                      "is_logged_in": true,
+                      "count_cart": 3,
+                      "count_notification": 1,
+                      "photo_profile": "string"
+                    },
+                    "provinces": ["string", "string", "string"],
+                    "properties": {
+                      "province": "string",
+                      "data": [
+                        {
+                          "name": "string",
+                          "category_name": "string",
+                          "star": 4.5,
+                          "city": "string",
+                          "price": 4500000,
+                          "width": 900,
+                          "ownership_type": "SHM",
+                          "photo_url": "string",
+                          "in_wishlist": true
+                        },
+                        {
+                          "name": "string",
+                          "category_name": "string",
+                          "star": 4.5,
+                          "city": "string",
+                          "price": 4500000,
+                          "width": 900,
+                          "ownership_type": "SHM",
+                          "photo_url": "string",
+                          "in_wishlist": false
+                        }
+                      ]
+                    },
+                    "pagination": {
+                      "page": 1,
+                      "count_page": 4,
+                      "count_items": 40
+                    }
+                  },
+                  "errors": null,
+                  "status": {
+                    "code": 200,
+                    "message": "OK"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/property/{propertyID}/details": {
+      "get": {
+        "tags": ["Property"],
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Get property details successfully",
+                  "data": {
+                    "user_details": {
+                      "is_logged_in": true,
+                      "count_cart": 3,
+                      "count_notification": 1,
+                      "photo_profile": "string"
+                    },
+                    "name": "string",
+                    "in_wishlist": false,
+                    "photo_urls": [
+                      "string", "string", "string"
+                    ],
+                    "price": 30000,
+                    "discount_price": 15000,
+                    "category_name": "string",
+                    "description": "string",
+                    "width": 900,
+                    "province": "string",
+                    "city": "string",
+                    "ownership_type": "SHM",
+                    "name_of_owner": "string",
+                    "photo_url": "string",
+                    "ratings_and_reviews": {
+                      "count_ratings": 10,
+                      "count_star_breakdown": [123, 34, 6, 1, 3],
+                      "data": [
+                        {
+                          "name": "string",
+                          "photo_url": "string",
+                          "content": "string",
+                          "count_helpful": 19,
+                          "is_helpful": false,
+                          "photo_urls": [
+                            "string", "string", "string"
+                          ]
+                        },
+                        {
+                          "name": "string",
+                          "photo_url": "string",
+                          "content": "string",
+                          "count_helpful": 19,
+                          "is_helpful": false,
+                          "photo_urls": [
+                            "string", "string", "string"
+                          ]
+                        }
+                      ]
+                    },
+                    "discuss": [
+                      {
+                        "content": "string",
+                        "name_of_author": "string",
+                        "photo_url": "string",
+                        "answers": [
+                          {
+                            "content": "string",
+                            "name_of_author": "string",
+                            "photo_url": "string"
+                          },
+                          {
+                            "content": "string",
+                            "name_of_author": "string",
+                            "photo_url": "string"
+                          }
+                        ]
+                      },
+                      {
+                        "content": "string",
+                        "name_of_author": "string",
+                        "photo_url": "string",
+                        "answers": [
+                          {
+                            "content": "string",
+                            "name_of_author": "string",
+                            "photo_url": "string"
+                          },
+                          {
+                            "content": "string",
+                            "name_of_author": "string",
+                            "photo_url": "string"
+                          }
+                        ]
+                      }
+                    ],
+                    "highlights": [
+                      {
+                        "name": "string",
+                        "photo_url": "string"
+                      },
+                      {
+                        "name": "string",
+                        "photo_url": "string"
+                      },
+                      {
+                        "name": "string",
+                        "photo_url": "string"
+                      }
+                    ]
+                  },
+                  "errors": null,
+                  "status": {
+                    "code": 200,
+                    "message": "OK"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/property/{propertyID}/reviews": {
+      "get": {
+        "tags": ["Property"],
+        "description": "",
+        "parameters": [
+          {
+            "name": "sort_by",
+            "in": "query",
+            "example": "newest"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Get property reviews successfully",
+                  "data": {
+                    "count_ratings": 10,
+                    "count_star_breakdown": [123, 34, 6, 1, 3],
+                    "reviews": [
+                      {
+                        "name": "string",
+                        "photo_url": "string",
+                        "content": "string",
+                        "count_helpful": 19,
+                        "is_helpful": false,
+                        "photo_urls": [
+                          "string", "string", "string"
+                        ]
+                      },
+                      {
+                        "name": "string",
+                        "photo_url": "string",
+                        "content": "string",
+                        "count_helpful": 19,
+                        "is_helpful": false,
+                        "photo_urls": [
+                          "string", "string", "string"
+                        ]
+                      }
+                    ],
+                    "pagination": {
+                      "page": 1,
+                      "count_page": 4,
+                      "count_items": 40
+                    }
+                  },
+                  "errors": null,
+                  "status": {
+                    "code": 200,
+                    "message": "OK"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/property/{propertyID}/discuss": {
+      "get": {
+        "tags": ["Property"],
+        "description": "",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Get discuss property successfully",
+                  "data": {
+                    "discuss": [
+                      {
+                        "content": "string",
+                        "name_of_author": "string",
+                        "photo_url": "string",
+                        "answers": [
+                          {
+                            "content": "string",
+                            "name_of_author": "string",
+                            "photo_url": "string"
+                          },
+                          {
+                            "content": "string",
+                            "name_of_author": "string",
+                            "photo_url": "string"
+                          }
+                        ]
+                      },
+                      {
+                        "content": "string",
+                        "name_of_author": "string",
+                        "photo_url": "string",
+                        "answers": [
+                          {
+                            "content": "string",
+                            "name_of_author": "string",
+                            "photo_url": "string"
+                          },
+                          {
+                            "content": "string",
+                            "name_of_author": "string",
+                            "photo_url": "string"
+                          }
+                        ]
+                      }
+                    ],
+                    "pagination": {
+                      "page": 1,
+                      "count_page": 4,
+                      "count_items": 40
+                    }
+                  },
+                  "errors": null,
+                  "status": {
+                    "code": 200,
+                    "message": "OK"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Property"],
+        "description": "",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "property_id": {
+                    "type": "string"
+                  },
+                  "parent_id": {
+                    "type": "string"
+                  },
+                  "content": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "property_id": "string",
+                "parent_id": "string",
+                "content": "string"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Create discuss successfully",
+                  "data": null,
+                  "errors": null,
+                  "status": {
+                    "code": 200,
+                    "message": "OK"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+
+    "/product/{categoryName}" : {
+      "get": {
+        "tags": ["Product"],
+        "description": "",
+        "parameters": [
+          {
+            "name": "sort_by",
+            "in": "query",
+            "example": "newest"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Get product successfully",
+                  "data": {
+                    "user_details": {
+                      "is_logged_in": true,
+                      "count_cart": 3,
+                      "count_notification": 1,
+                      "photo_profile": "string"
+                    },
+                    "products": [
+                      {
+                        "name": "string",
+                        "category_name": "string",
+                        "star": 4.5,
+                        "price": 30000,
+                        "photo_url": "string",
+                        "in_wishlist": false
+                      },
+                      {
+                        "name": "string",
+                        "category_name": "string",
+                        "star": 4.5,
+                        "price": 30000,
+                        "photo_url": "string",
+                        "in_wishlist": false
+                      }
+                    ],
+                    "pagination": {
+                      "page": 1,
+                      "count_page": 4,
+                      "count_items": 40
+                    }
+                  },
+                  "errors": null,
+                  "status": {
+                    "code": 200,
+                    "message": "OK"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/product/{productID}/details": {
+      "get": {
+        "tags": ["Product"],
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Get product details successfully",
+                  "data": {
+                    "user_details": {
+                      "is_logged_in": true,
+                      "count_cart": 3,
+                      "count_notification": 1,
+                      "photo_profile": "string"
+                    },
+                    "name": "string",
+                    "in_wishlist": false,
+                    "photo_urls": [
+                      "string", "string", "string"
+                    ],
+                    "price": 30000,
+                    "discount_price": 15000,
+                    "stock": 10,
+                    "category_name": "string",
+                    "weight": 250,
+                    "shelf_life": 8,
+                    "organic_certification": "string",
+                    "description": "string",
+                    "delivery_fees_range": "string",
+                    "delivery_days_range": "string",
+                    "ratings_and_reviews": {
+                      "count_ratings": 10,
+                      "count_star_breakdown": [123, 34, 6, 1, 3],
+                      "data": [
+                        {
+                          "name": "string",
+                          "photo_url": "string",
+                          "content": "string",
+                          "count_helpful": 19,
+                          "is_helpful": false,
+                          "photo_urls": [
+                            "string", "string", "string"
+                          ]
+                        },
+                        {
+                          "name": "string",
+                          "photo_url": "string",
+                          "content": "string",
+                          "count_helpful": 19,
+                          "is_helpful": false,
+                          "photo_urls": [
+                            "string", "string", "string"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "errors": null,
+                  "status": {
+                    "code": 200,
+                    "message": "OK"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/product/{productID}/reviews": {
+      "get": {
+        "tags": ["Product"],
+        "description": "",
+        "parameters": [
+          {
+            "name": "sort_by",
+            "in": "query",
+            "example": "newest"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Get product reviews successfully",
+                  "data": {
+                    "user_details": {
+                      "is_logged_in": true,
+                      "count_cart": 3,
+                      "count_notification": 1,
+                      "photo_profile": "string"
+                    },
+                    "count_ratings": 10,
+                    "count_star_breakdown": [123, 34, 6, 1, 3],
+                    "reviews": [
+                      {
+                        "name": "string",
+                        "photo_url": "string",
+                        "content": "string",
+                        "count_helpful": 19,
+                        "is_helpful": false,
+                        "photo_urls": [
+                          "string", "string", "string"
+                        ]
+                      },
+                      {
+                        "name": "string",
+                        "photo_url": "string",
+                        "content": "string",
+                        "count_helpful": 19,
+                        "is_helpful": false,
+                        "photo_urls": [
+                          "string", "string", "string"
+                        ]
+                      }
+                    ],
+                    "pagination": {
+                      "page": 1,
+                      "count_page": 4,
+                      "count_items": 40
+                    }
+                  },
+                  "errors": null,
+                  "status": {
+                    "code": 200,
+                    "message": "OK"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+
+    "/ping": {
+      "get": {
+        "tags": [
+          "Ping Server"
+        ],
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "text/plain": {
+                "example": "pong"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/facebook": {
+      "get": {
+        "tags": ["Authentication"],
+        "description": "",
+        "responses": {
+          "302": {
+            "description": "",
+            "headers": {
+              "Location": {
+                "description": "",
+                "schema": {
+                  "example": "https://www.facebook.com/v3.2/dialog/oauth?XXXXX"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/google": {
+      "get": {
+        "tags": ["Authentication"],
+        "description": "",
+        "responses": {
+          "304": {
+            "description": "",
+            "headers": {
+              "Location": {
+                "description": "",
+                "schema": {
+                  "example": "https://accounts.google.com/o/oauth2/auth?XXXXX"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/oauth/register": {
+      "post": {
+        "tags": ["Authentication"],
+        "description": "",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "token": { "type": "string" },
+                  "email": { "type": "string" },
+                  "username": { "type": "string" },
+                  "phone_number": { "type": "string" },
+                  "address": { "type": "string" },
+                  "district": { "type": "string" },
+                  "city": { "type": "string" },
+                  "state": { "type": "string" },
+                  "postal_code": { "type": "string" },
+                  "latitude": { "type": "number", "format": "float" },
+                  "longitude": { "type": "number", "format": "float" }
+                }
+              },
+              "example": {
+                "token": "string",
+                "email": "string",
+                "username": "string",
+                "phone_number": "string",
+                "address": "string",
+                "district": "string",
+                "city": "string",
+                "state": "string",
+                "postal_code": "string",
+                "latitude": 52.5200,
+                "longitude": 13.4050
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Account created successfully",
+                  "data": {
+                    "access_token": "string"
+                  },
+                  "errors": null,
+                  "status": {
+                    "code": 201,
+                    "message": "Created"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": ["Authentication"],
+        "description": "",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string" },
+                  "password": { "type": "string" }
+                }
+              },
+              "example": {
+                "email": "string",
+                "password": "string"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Account login successfully",
+                  "data": {
+                    "access_token": "string"
+                  },
+                  "errors": null,
+                  "status": {
+                    "code": 200,
+                    "message": "OK"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/pre-register": {
+      "post": {
+        "tags": ["Authentication"],
+        "description": "",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "username": { "type": "string" },
+                  "email": { "type": "string" },
+                  "password": { "type": "string" }
+                }
+              },
+              "example": {
+                "name": "string",
+                "username": "string",
+                "email": "string",
+                "password": "string"
+              }
+            }
+          }
+        },
+
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Email and username are available and not duplicated",
+                  "data": null,
+                  "errors": null,
+                  "status": {
+                    "code": 200,
+                    "message": "OK"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "tags": ["Authentication"],
+        "description": "",
+        "requestBody": {
+          "required": true,
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "username": { "type": "string" },
+                  "email": { "type": "string" },
+                  "password": { "type": "string" },
+                  "phone_number": { "type": "string" },
+                  "address": { "type": "string" },
+                  "district": { "type": "string" },
+                  "city": { "type": "string" },
+                  "state": { "type": "string" },
+                  "postal_code": { "type": "string" },
+                  "latitude": { "type": "number", "format": "float" },
+                  "longitude": { "type": "number", "format": "float" }
+                }
+              },
+              "example": {
+                "name": "string",
+                "username": "string",
+                "email": "string",
+                "password": "string",
+                "phone_number": "string",
+                "address": "string",
+                "district": "string",
+                "city": "string",
+                "state": "string",
+                "postal_code": "string",
+                "latitude": 52.52,
+                "longitude": 13.405
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "The code has been sent to your email",
+                  "data": null,
+                  "errors": null,
+                  "status": {
+                    "code": 200,
+                    "message": "OK"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/send": {
+      "post": {
+        "tags": ["Authentication"],
+        "description": "",
+        "requestBody": {
+          "required": true,
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "email": "string"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "The code has been sent to your email",
+                  "data": null,
+                  "errors": null,
+                  "status": {
+                    "code": 200,
+                    "message": "OK"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/register/complete": {
+      "post": {
+        "tags": ["Authentication"],
+        "description": "",
+        "requestBody": {
+          "required": true,
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string"
+                  },
+                  "code": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "email": "string",
+                "code": "123456"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Account created successfully",
+                  "data": {
+                    "access_token": "string"
+                  },
+                  "errors": null,
+                  "status": {
+                    "code": 201,
+                    "message": "Created"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/renew-access-token": {
+      "get": {
+        "tags": ["Authentication"],
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Renew access token successfully",
+                  "data": {
+                    "access_token": "string"
+                  },
+                  "errors": null,
+                  "status": {
+                    "code": 200,
+                    "message": "OK"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "delete": {
+        "tags": ["Authentication"],
+        "description": "",
+        "responses": {
+          "204": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "You have successfully logged out",
+                  "data": null,
+                  "errors": null,
+                  "status": {
+                    "code": 204,
+                    "message": "No Content"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+
+    "/menu/homepage": {
+      "get": {
+        "tags": ["Menu"],
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Get homepage successfully",
+                  "data": {
+                    "user_details": {
+                      "is_logged_in": true,
+                      "count_cart": 3,
+                      "count_notification": 1,
+                      "photo_profile": "string"
+                    },
+                    "properties_promo": {
+                      "time_left_in_seconds": 36000,
+                      "properties": [
+                        {
+                          "name": "string",
+                          "category_name": "string",
+                          "star": 4.5,
+                          "city": "string",
+                          "price": 4500000,
+                          "discount_price": 3000000,
+                          "width": 900,
+                          "ownership_type": "SHM",
+                          "photo_url": "string",
+                          "in_wishlist": true
+                        },
+                        {
+                          "name": "string",
+                          "category_name": "string",
+                          "star": 4.5,
+                          "city": "string",
+                          "price": 4500000,
+                          "discount_price": 3000000,
+                          "width": 900,
+                          "ownership_type": "SHM",
+                          "photo_url": "string",
+                          "in_wishlist": false
+                        }
+                      ]
+                    },
+                    "products_promo": {
+                      "time_left_in_seconds": 36000,
+                      "products": [
+                        {
+                          "name": "string",
+                          "category_name": "string",
+                          "star": 4.5,
+                          "price": 30000,
+                          "discount_price": 15000,
+                          "photo_url": "string",
+                          "in_wishlist": false
+                        },
+                        {
+                          "name": "string",
+                          "category_name": "string",
+                          "star": 4.5,
+                          "price": 30000,
+                          "discount_price": 15000,
+                          "photo_url": "string",
+                          "in_wishlist": false
+                        }
+                      ]
+                    },
+                    "properties": {
+                      "province": "string",
+                      "data": [
+                        {
+                          "name": "string",
+                          "category_name": "string",
+                          "star": 4.5,
+                          "city": "string",
+                          "price": 4500000,
+                          "width": 900,
+                          "ownership_type": "SHM",
+                          "photo_url": "string",
+                          "in_wishlist": true
+                        },
+                        {
+                          "name": "string",
+                          "category_name": "string",
+                          "star": 4.5,
+                          "city": "string",
+                          "price": 4500000,
+                          "width": 900,
+                          "ownership_type": "SHM",
+                          "photo_url": "string",
+                          "in_wishlist": false
+                        }
+                      ]
+                    },
+                    "products": [
+                      {
+                        "name": "string",
+                        "category_name": "string",
+                        "star": 4.5,
+                        "price": 30000,
+                        "photo_url": "string",
+                        "in_wishlist": false
+                      },
+                      {
+                        "name": "string",
+                        "category_name": "string",
+                        "star": 4.5,
+                        "price": 30000,
+                        "photo_url": "string",
+                        "in_wishlist": false
+                      }
+                    ],
+                    "educations": [
+                      {
+                        "title": "string",
+                        "photo_url": "string",
+                        "photo_url_author": "string",
+                        "name_of_author": "string",
+                        "created_at": 916072581,
+                        "count_likes": 1,
+                        "count_views": 162,
+                        "count_comments": 4,
+                        "in_wishlist": false
+                      },
+                      {
+                        "title": "string",
+                        "photo_url": "string",
+                        "photo_url_author": "string",
+                        "name_of_author": "string",
+                        "created_at": 916072581,
+                        "count_likes": 1,
+                        "count_views": 162,
+                        "count_comments": 4,
+                        "in_wishlist": false
+                      }
+                    ]
+                  },
+                  "errors": null,
+                  "status": {
+                    "code": 200,
+                    "message": "OK"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/menu/market": {
+      "get": {
+        "tags": ["Menu"],
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Get market successfully",
+                  "data": {
+                    "user_details": {
+                      "is_logged_in": true,
+                      "count_cart": 3,
+                      "count_notification": 1,
+                      "photo_profile": "string"
+                    },
+                    "properties_promo": {
+                      "time_left_in_seconds": 36000,
+                      "properties": [
+                        {
+                          "name": "string",
+                          "category_name": "string",
+                          "star": 4.5,
+                          "city": "string",
+                          "price": 4500000,
+                          "discount_price": 3000000,
+                          "width": 900,
+                          "ownership_type": "SHM",
+                          "photo_url": "string",
+                          "in_wishlist": true
+                        },
+                        {
+                          "name": "string",
+                          "category_name": "string",
+                          "star": 4.5,
+                          "city": "string",
+                          "price": 4500000,
+                          "discount_price": 3000000,
+                          "width": 900,
+                          "ownership_type": "SHM",
+                          "photo_url": "string",
+                          "in_wishlist": false
+                        }
+                      ]
+                    },
+                    "products_promo": {
+                      "time_left_in_seconds": 36000,
+                      "products": [
+                        {
+                          "name": "string",
+                          "category_name": "string",
+                          "star": 4.5,
+                          "price": 30000,
+                          "discount_price": 15000,
+                          "photo_url": "string",
+                          "in_wishlist": false
+                        },
+                        {
+                          "name": "string",
+                          "category_name": "string",
+                          "star": 4.5,
+                          "price": 30000,
+                          "discount_price": 15000,
+                          "photo_url": "string",
+                          "in_wishlist": false
+                        }
+                      ]
+                    },
+                    "properties": {
+                      "province": "string",
+                      "provinces": ["string", "string", "string"],
+                      "data": [
+                        {
+                          "name": "string",
+                          "category_name": "string",
+                          "star": 4.5,
+                          "city": "string",
+                          "price": 4500000,
+                          "width": 900,
+                          "ownership_type": "SHM",
+                          "photo_url": "string",
+                          "in_wishlist": true
+                        },
+                        {
+                          "name": "string",
+                          "category_name": "string",
+                          "star": 4.5,
+                          "city": "string",
+                          "price": 4500000,
+                          "width": 900,
+                          "ownership_type": "SHM",
+                          "photo_url": "string",
+                          "in_wishlist": false
+                        }
+                      ],
+                      "pagination": {
+                        "page": 1,
+                        "count_page": 4,
+                        "count_items": 40
+                      }
+                    },
+                    "products": {
+                      "data": [
+                        {
+                          "name": "string",
+                          "category_name": "string",
+                          "star": 4.5,
+                          "price": 30000,
+                          "photo_url": "string",
+                          "in_wishlist": false
+                        },
+                        {
+                          "name": "string",
+                          "category_name": "string",
+                          "star": 4.5,
+                          "price": 30000,
+                          "photo_url": "string",
+                          "in_wishlist": false
+                        }
+                      ],
+                      "pagination": {
+                        "page": 1,
+                        "count_page": 4,
+                        "count_items": 40
+                      }
+                    }
+                  },
+                  "errors": null,
+                  "status": {
+                    "code": 200,
+                    "message": "OK"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/menu/education": {
+      "get": {
+        "tags": ["Menu"],
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Get education successfully",
+                  "data": {
+                    "user_details": {
+                      "is_logged_in": true,
+                      "count_cart": 3,
+                      "count_notification": 1,
+                      "photo_profile": "string"
+                    },
+                    "main": {
+                      "title": "string",
+                      "photo_url": "string",
+                      "photo_url_author": "string",
+                      "name_of_author": "string",
+                      "created_at": 916072581,
+                      "count_likes": 1,
+                      "count_views": 162,
+                      "count_comments": 4,
+                      "in_wishlist": false
+                    },
+                    "latest": [
+                      {
+                        "title": "string",
+                        "photo_url": "string",
+                        "photo_url_author": "string",
+                        "name_of_author": "string",
+                        "created_at": 916072581,
+                        "count_likes": 1,
+                        "count_views": 162,
+                        "count_comments": 4,
+                        "in_wishlist": false
+                      },
+                      {
+                        "title": "string",
+                        "photo_url": "string",
+                        "photo_url_author": "string",
+                        "name_of_author": "string",
+                        "created_at": 916072581,
+                        "count_likes": 1,
+                        "count_views": 162,
+                        "count_comments": 4,
+                        "in_wishlist": false
+                      }
+                    ],
+                    "must_read": [
+                      {
+                        "title": "string",
+                        "photo_url": "string",
+                        "photo_url_author": "string",
+                        "name_of_author": "string",
+                        "created_at": 916072581,
+                        "count_likes": 1,
+                        "count_views": 162,
+                        "count_comments": 4,
+                        "in_wishlist": false
+                      },
+                      {
+                        "title": "string",
+                        "photo_url": "string",
+                        "photo_url_author": "string",
+                        "name_of_author": "string",
+                        "created_at": 916072581,
+                        "count_likes": 1,
+                        "count_views": 162,
+                        "count_comments": 4,
+                        "in_wishlist": false
+                      }
+                    ],
+                    "discover_more": {
+                      "data": [
+                        {
+                          "title": "string",
+                          "photo_url": "string",
+                          "photo_url_author": "string",
+                          "name_of_author": "string",
+                          "created_at": 916072581,
+                          "count_likes": 1,
+                          "count_views": 162,
+                          "count_comments": 4,
+                          "in_wishlist": false
+                        },
+                        {
+                          "title": "string",
+                          "photo_url": "string",
+                          "photo_url_author": "string",
+                          "name_of_author": "string",
+                          "created_at": 916072581,
+                          "count_likes": 1,
+                          "count_views": 162,
+                          "count_comments": 4,
+                          "in_wishlist": false
+                        }
+                      ],
+                      "pagination": {
+                        "page": 1,
+                        "count_page": 4,
+                        "count_items": 40
+                      }
+                    }
+                  },
+                  "errors": null,
+                  "status": {
+                    "code": 200,
+                    "message": "OK"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
   }
 }
