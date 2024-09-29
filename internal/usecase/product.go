@@ -66,7 +66,7 @@ func (u *ProductUseCase) GetProducts(ctx context.Context, userID, categoryName, 
 		ID: userID,
 	}
 	err = u.UserRepository.Read(tx, "iD", user)
-	if err != nil {
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		u.Log.Warnf("failed to get user details: %+v\n", err)
 		return nil, ErrFailedToReadData
 	}
@@ -125,7 +125,7 @@ func (u *ProductUseCase) GetProductDetails(ctx context.Context, userID, productI
 		ID: userID,
 	}
 	err = u.UserRepository.Read(tx, "iD", user)
-	if err != nil {
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		u.Log.Warnf("failed to get user details: %+v\n", err)
 		return nil, ErrFailedToReadData
 	}
@@ -267,7 +267,7 @@ func (u *ProductUseCase) GetProductReviews(ctx context.Context, userID, productI
 		ID: userID,
 	}
 	err = u.UserRepository.Read(tx, "iD", user)
-	if err != nil {
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		u.Log.Warnf("failed to read data user details: %+v\n", err)
 		return nil, ErrFailedToReadData
 	}

@@ -47,7 +47,7 @@ func (u *MenuUseCase) Homepage(ctx context.Context, userID string) (*response.Ho
 		ID: userID,
 	}
 	err = u.UserRepository.Read(tx, "iD", user)
-	if err != nil {
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		u.Log.Warnf("failed to get user detail: %+v\n", err)
 		return nil, ErrFailedToReadData
 	}
@@ -159,7 +159,7 @@ func (u *MenuUseCase) Market(ctx context.Context, userID string) (*response.Mark
 		ID: userID,
 	}
 	err = u.UserRepository.Read(tx, "iD", user)
-	if err != nil {
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		u.Log.Warnf("failed to get user detail: %+v\n", err)
 		return nil, ErrFailedToReadData
 	}
