@@ -20,4 +20,6 @@ type PropertyRepository interface {
 	GetState(tx *sqlx.Tx, provinces *[]string) error
 
 	RatingBreakdown(tx *sqlx.Tx, productID string, ratingBreakdown *[]response.RatingBreakdown) error
+
+	GetAllPropertiesWithPromo(tx *sqlx.Tx, categoryName, userID, sortBy, notIN, province string, page int, properties *[]response.GetProperties) error
 }

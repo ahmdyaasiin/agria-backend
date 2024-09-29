@@ -17,6 +17,7 @@ type Config struct {
 	CartHandler            interfaces.CartHandler
 	WishlistHandler        interfaces.WishlistHandler
 	PropertyHandler        interfaces.PropertyHandler
+	MenuHandler            interfaces.MenuHandler
 }
 
 func (c *Config) Start() {
@@ -26,6 +27,6 @@ func (c *Config) Start() {
 	v1 := c.App.Group("/v1")
 
 	route.NewPingRoute(v1)
-	route.NewUserRoutes(v1, c.UserHandler, c.ProductHandler, c.CartHandler, c.WishlistHandler, c.PropertyHandler, c.AuthUserMiddleware, c.OptionalAuthMiddleware)
+	route.NewUserRoutes(v1, c.UserHandler, c.ProductHandler, c.CartHandler, c.WishlistHandler, c.PropertyHandler, c.MenuHandler, c.AuthUserMiddleware, c.OptionalAuthMiddleware)
 	route.NewAdminRoutes(v1.Group("/admin"))
 }

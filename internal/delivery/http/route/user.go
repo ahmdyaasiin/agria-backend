@@ -11,6 +11,7 @@ func NewUserRoutes(route fiber.Router,
 	cartHandler interfaces.CartHandler,
 	wishlistHandler interfaces.WishlistHandler,
 	propertyHandler interfaces.PropertyHandler,
+	menuHandler interfaces.MenuHandler,
 	authMiddleware fiber.Handler,
 	optionalAuthMiddleware fiber.Handler) {
 	route.Get("/hello", func(ctx fiber.Ctx) error {
@@ -49,4 +50,9 @@ func NewUserRoutes(route fiber.Router,
 	//property.Get("/:propertyID/reviews", propertyHandler.GetPropertyReviews, optionalAuthMiddleware)
 	//property.Get("/:propertyID/discuss", propertyHandler.GetPropertyDiscuss, optionalAuthMiddleware)
 	//property.Post("/:propertyID/discuss", propertyHandler.AddPropertyDiscuss, authMiddleware)
+
+	menu := route.Group("/menu")
+	menu.Get("/homepage", menuHandler.GetHomepage, optionalAuthMiddleware)
+	menu.Get("/market", menuHandler.GetMarket, optionalAuthMiddleware)
+	menu.Get("/education", menuHandler.GetEducation)
 }

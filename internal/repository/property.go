@@ -70,6 +70,61 @@ func (r *PropertyRepository) GetAllPropertiesWithoutPromo(tx *sqlx.Tx, categoryN
 	return err
 }
 
+func (r *PropertyRepository) GetAllPropertiesWithPromo(tx *sqlx.Tx, categoryName, userID, sortBy, notIN, province string, page int, properties *[]response.GetProperties) error {
+	q := QueryGetAllPropertiesWithoutCondition1
+	param := map[string]any{}
+
+	if userID != "" {
+		q += QueryAdditionalForGetAllProperties
+		param["user_id"] = userID
+	}
+
+	q += QueryGetAllPropertiesWithoutCondition2
+
+	if categoryName != "" {
+		q += " AND c.name = :category_name"
+		param["category_name"] = categoryName
+	}
+
+	if province != "all" {
+		q += " AND p.state = :state"
+		param["state"] = province
+	}
+
+	if notIN != "()" {
+		q += fmt.Sprintf(" AND p.id IN %s", notIN)
+	}
+
+	q += " GROUP BY p.id"
+
+	switch sortBy {
+	case "high_rating":
+		q += ", ratings ORDER BY ratings DESC"
+	case "high_price":
+		q += ", p.price ORDER BY p.price DESC"
+	case "low_price":
+		q += ", p.price ORDER BY p.price"
+	default:
+		q += ", p.created_at ORDER BY p.created_at DESC"
+	}
+
+	if page != 0 {
+		q += fmt.Sprintf(" LIMIT %d, 5", (page-1)*5)
+	}
+
+	stmt, err := tx.PrepareNamed(q)
+	if err != nil {
+		return err
+	}
+
+	err = stmt.Select(properties, param)
+	if err != nil {
+		return err
+	}
+
+	return err
+}
+
 func (r *PropertyRepository) GetPropertyDetails(tx *sqlx.Tx, propertyID, userID string, property *response.GetPropertyDetails) error {
 	q := QueryGetPropertyDetails
 

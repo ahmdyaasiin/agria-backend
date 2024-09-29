@@ -15,4 +15,6 @@ type ProductRepository interface {
 
 	GetAllProductsWithoutPromo(tx *sqlx.Tx, categoryName, userID, sortBy, notIN string, page int, product *[]response.GetProduct) error
 	GetDetailsProduct(tx *sqlx.Tx, productID, userID string, product *response.GetProductDetails) error
+
+	GetAllProductsWithPromo(tx *sqlx.Tx, categoryName, userID, sortBy, notIN string, page int, product *[]response.GetProduct) error
 }

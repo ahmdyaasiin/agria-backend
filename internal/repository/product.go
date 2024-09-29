@@ -105,6 +105,52 @@ func (r *ProductRepository) GetAllProductsWithoutPromo(tx *sqlx.Tx, categoryName
 	return err
 }
 
+func (r *ProductRepository) GetAllProductsWithPromo(tx *sqlx.Tx, categoryName, userID, sortBy, notIN string, page int, product *[]response.GetProduct) error {
+	q := QueryGetAllProductsWithoutCondition1
+	param := map[string]any{}
+
+	if userID != "" {
+		q += QueryAdditionalForGetAllProducts
+		param["user_id"] = userID
+	}
+
+	q += QueryGetAllProductsWithoutCondition2
+
+	if categoryName != "" {
+		q += " AND c.name = :category_name"
+		param["category_name"] = categoryName
+	}
+
+	q += fmt.Sprintf(" AND p.id IN %s GROUP BY p.id", notIN)
+
+	switch sortBy {
+	case "high_rating":
+		q += ", ratings ORDER BY ratings DESC"
+	case "high_price":
+		q += ", p.price ORDER BY p.price DESC"
+	case "low_price":
+		q += ", p.price ORDER BY p.price"
+	default:
+		q += ", p.created_at ORDER BY p.created_at DESC"
+	}
+
+	if page != 0 {
+		q += fmt.Sprintf(" LIMIT %d, 24", (page-1)*5)
+	}
+
+	stmt, err := tx.PrepareNamed(q)
+	if err != nil {
+		return err
+	}
+
+	err = stmt.Select(product, param)
+	if err != nil {
+		return err
+	}
+
+	return err
+}
+
 func (r *ProductRepository) GetDetailsProduct(tx *sqlx.Tx, productID, userID string, product *response.GetProductDetails) error {
 	q := QueryGetDetailsProduct1
 

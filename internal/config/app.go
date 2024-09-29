@@ -38,6 +38,7 @@ func App(c *AppConfig) {
 	propertyRepository := repository.NewPropertyRepository(c.DB)
 	propertyRatingRepository := repository.NewPropertyRatingRepository(c.DB)
 	discussRepository := repository.NewDiscussRepository(c.DB)
+	educationRepository := repository.NewEducationRepository(c.DB)
 
 	// usecases
 	userUseCase := usecase.NewUserUseCase(c.DB, c.Log, c.Redis, userRepository, addressRepository, refreshRepository)
@@ -45,6 +46,7 @@ func App(c *AppConfig) {
 	cartUseCase := usecase.NewCartUseCase(c.DB, c.Log, c.Redis, cartRepository, productRepository, userRepository)
 	wishlistUseCase := usecase.NewWishlistUseCase(c.DB, c.Log, c.Redis, wishlistRepository, userRepository, cartRepository)
 	propertyUseCase := usecase.NewPropertyUseCase(c.DB, c.Log, c.Redis, propertyRepository, propertyRatingRepository, discussRepository, wishlistRepository, userRepository, cartRepository)
+	menuUseCase := usecase.NewMenuUseCase(c.DB, c.Log, c.Redis, userRepository, cartRepository, propertyRepository, productRepository, educationRepository)
 
 	// handler
 	userHandler := handler.NewUserHandler(c.Log, c.Validator, c.FacebookOAuth, c.GoogleOAuth, userUseCase)
@@ -52,6 +54,7 @@ func App(c *AppConfig) {
 	cartHandler := handler.NewCartHandler(c.Log, c.Validator, cartUseCase)
 	wishlistHandler := handler.NewWishHandler(c.Log, c.Validator, wishlistUseCase)
 	propertyHandler := handler.NewPropertyHandler(c.Log, c.Validator, propertyUseCase)
+	menuHandler := handler.NewMenuHandler(c.Log, c.Validator, menuUseCase)
 
 	// middleware
 	authUserMiddleware := middleware.Auth(c.Log)
@@ -70,6 +73,7 @@ func App(c *AppConfig) {
 		CorsMiddleware:         corsMiddleware,
 		HTTPMiddleware:         httpMiddleware,
 		PropertyHandler:        propertyHandler,
+		MenuHandler:            menuHandler,
 	}
 
 	server.Start()

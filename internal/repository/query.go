@@ -1,6 +1,10 @@
 package repository
 
 var (
+	QueryGetEducation = "SELECT e.id, e.title, (SELECT em.photo_url FROM education_media em WHERE em.education_id = e.id ORDER BY em.created_at LIMIT 1) as photo_url, u.name, u.photo_url as photo_url_author, e.created_at FROM educations e INNER JOIN contributors c on e.id = c.education_id INNER JOIN users u on c.user_id = u.id"
+)
+
+var (
 	QueryGetPropertyDetails      = "SELECT p.id, p.name, p.price, p.description, p.width, p.state as province, p.city, p.certification_type as ownership_type, IFNULL((SELECT 1 FROM property_wishlist pw WHERE pw.property_id = p.id AND pw.user_id = :user_id), 0) as in_wishlist, c.name as category_name, u.name as name_of_owner, u.photo_url FROM properties p INNER JOIN categories c on p.category_id = c.id INNER JOIN users u on p.user_id = u.id WHERE p.id = :property_id"
 	QueryGetPropertyHighlights   = "SELECT h.name, h.photo_url FROM property_highlights ph INNER JOIN highlights h on ph.highlight_id = h.id WHERE ph.property_id = :property_id"
 	QueryGetPropertyMedia        = "SELECT pm.photo_url FROM property_media pm WHERE pm.property_id = :property_id"
