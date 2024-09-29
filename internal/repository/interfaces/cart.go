@@ -16,4 +16,6 @@ type CartRepository interface {
 	GetMyCartUnavailable(tx *sqlx.Tx, userID string, carts *[]response.CartProducts) error
 
 	GetMyCart(tx *sqlx.Tx, userID, productID string, cart *domain.Cart) error
+
+	CountCart(tx *sqlx.Tx, userID string, total *int) error
 }

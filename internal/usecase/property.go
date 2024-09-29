@@ -28,20 +28,26 @@ type PropertyUseCase struct {
 	PropertyRatingRepository repositoryInterface.PropertyRatingRepository
 	DiscussRepository        repositoryInterface.DiscussRepository
 	WishlistRepository       repositoryInterface.WishlistRepository
+	UserRepository           repositoryInterface.UserRepository
+	CartRepository           repositoryInterface.CartRepository
 }
 
 func NewPropertyUseCase(DB *sqlx.DB, log *logrus.Logger, redis *redis.Client,
 	propertyRepository repositoryInterface.PropertyRepository,
 	propertyRatingRepository repositoryInterface.PropertyRatingRepository,
 	discussRepository repositoryInterface.DiscussRepository,
-	wishlistRepository repositoryInterface.WishlistRepository) interfaces.PropertyUseCase {
+	wishlistRepository repositoryInterface.WishlistRepository,
+	userRepository repositoryInterface.UserRepository,
+	cartRepository repositoryInterface.CartRepository) interfaces.PropertyUseCase {
 	return &PropertyUseCase{DB: DB, Log: log, Redis: redis, PropertyRepository: propertyRepository,
 		PropertyRatingRepository: propertyRatingRepository,
 		DiscussRepository:        discussRepository,
-		WishlistRepository:       wishlistRepository}
+		WishlistRepository:       wishlistRepository,
+		UserRepository:           userRepository,
+		CartRepository:           cartRepository}
 }
 
-func (u *PropertyUseCase) GetAllWishlistsProperties(ctx context.Context, userID string) (*[]response.MyWishlistProperties, error) {
+func (u *PropertyUseCase) GetAllWishlistsProperties(ctx context.Context, userID string) (*response.PropertiesWishlist, error) {
 	tx, err := u.DB.Beginx()
 	defer tx.Rollback()
 	if err != nil {
@@ -49,15 +55,25 @@ func (u *PropertyUseCase) GetAllWishlistsProperties(ctx context.Context, userID 
 		return nil, ErrCreateDatabaseTransaction
 	}
 
-	wishlists := new([]response.MyWishlistProperties)
-	err = u.WishlistRepository.GetMyWishlistsProperty(tx, userID, wishlists)
+	res := new(response.PropertiesWishlist)
+
+	user := &domain.User{
+		ID: userID,
+	}
+	err = u.UserRepository.Read(tx, "iD", user)
+	if err != nil {
+		u.Log.Warnf("failed to read user details: %+v\n", err)
+		return nil, ErrFailedToReadData
+	}
+
+	err = u.WishlistRepository.GetMyWishlistsProperty(tx, userID, &res.Properties)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		u.Log.Warnf("failed to get wishlist products: %+v\n", err)
 		return nil, ErrFailedToReadData
 	}
 
-	if len(*wishlists) != 0 {
-		keys := strings.Split((*wishlists)[0].ProductIDString, ",")
+	if len(res.Properties) != 0 {
+		keys := strings.Split((res.Properties)[0].ProductIDString, ",")
 		discountProducts, err := u.Redis.MGet(ctx, keys...).Result()
 		if err != nil {
 			u.Log.Warnf("failed to get discount available products: %+v\n", err)
@@ -74,11 +90,26 @@ func (u *PropertyUseCase) GetAllWishlistsProperties(ctx context.Context, userID 
 				return nil, ErrParseStringToNumber
 			}
 
-			(*wishlists)[i].DiscountPrice = int64(d)
+			(res.Properties)[i].DiscountPrice = int64(d)
 		}
 	}
 
-	return wishlists, nil
+	var total int
+	err = u.CartRepository.CountCart(tx, user.ID, &total)
+	if err != nil {
+		u.Log.Warnf("failed to get count cart: %+v\n", err)
+		return nil, ErrFailedToReadData
+	}
+
+	res.UserDetails.IsLoggedIn = user.ID != ""
+	res.UserDetails.CountCarts = total
+	res.UserDetails.PhotoProfile = user.PhotoUrl
+
+	res.Pagination.Page = 0
+	res.Pagination.TotalItems = int64(len(res.Properties))
+	res.Pagination.TotalPages = 1
+
+	return res, nil
 }
 
 func (u *PropertyUseCase) ManageWishlistProperties(ctx context.Context, userID string, req *request.ManageWishlistProperties) (*response.ManageWishlistProperties, error) {
@@ -139,6 +170,15 @@ func (u *PropertyUseCase) GetProperties(ctx context.Context, userID, categoryNam
 		return nil, ErrCreateDatabaseTransaction
 	}
 
+	user := &domain.User{
+		ID: userID,
+	}
+	err = u.UserRepository.Read(tx, "iD", user)
+	if err != nil {
+		u.Log.Warnf("failed to read user details: %+v\n", err)
+		return nil, ErrFailedToReadData
+	}
+
 	ids, err := u.Redis.Keys(ctx, "discount_property_id_*").Result()
 	if err != nil {
 		u.Log.Warnf("failed to read keys in redis: %+v\n", err)
@@ -157,15 +197,36 @@ func (u *PropertyUseCase) GetProperties(ctx context.Context, userID, categoryNam
 	notIN := fmt.Sprintf("(%s)", strings.Join(uuids, ","))
 
 	res := new(response.GetPropertiesWithPagination)
-	err = u.PropertyRepository.GetAllPropertiesWithoutPromo(tx, categoryName, userID, sortBy, notIN, province, page, &res.Properties)
+	err = u.PropertyRepository.GetAllPropertiesWithoutPromo(tx, categoryName, userID, sortBy, notIN, province, page, &res.Properties.Data)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		u.Log.Warnf("failed to get products: %+v\n", err)
 		return nil, ErrFailedToReadData
 	}
 
-	res.Page = page
-	res.TotalItems = int64(len(res.Properties))
-	res.TotalPages = int64(math.Ceil(float64(res.TotalItems) / 24))
+	var total int
+	err = u.CartRepository.CountCart(tx, userID, &total)
+	if err != nil {
+		u.Log.Warnf("failed to count cart: %+v\n", err)
+		return nil, ErrFailedToReadData
+	}
+
+	var provinces []string
+	err = u.PropertyRepository.GetState(tx, &provinces)
+	if err != nil {
+		u.Log.Warnf("failed to get state")
+		return nil, ErrFailedToReadData
+	}
+
+	res.Provinces = provinces
+	res.Properties.Province = province
+
+	res.UserDetails.IsLoggedIn = user.ID != ""
+	res.UserDetails.CountCarts = total
+	res.UserDetails.PhotoProfile = user.PhotoUrl
+
+	res.Pagination.Page = page
+	res.Pagination.TotalItems = int64(len(res.Properties.Data))
+	res.Pagination.TotalPages = int64(math.Ceil(float64(res.Pagination.TotalItems) / 24))
 
 	return res, nil
 }
@@ -176,6 +237,15 @@ func (u *PropertyUseCase) GetPropertyDetails(ctx context.Context, userID, proper
 	if err != nil {
 		u.Log.Warnf("create transaction: %+v\n", err)
 		return nil, ErrCreateDatabaseTransaction
+	}
+
+	user := &domain.User{
+		ID: userID,
+	}
+	err = u.UserRepository.Read(tx, "iD", user)
+	if err != nil {
+		u.Log.Warnf("failed to get user details: %+v\n", err)
+		return nil, ErrFailedToReadData
 	}
 
 	product := new(response.GetPropertyDetails)
@@ -220,20 +290,69 @@ func (u *PropertyUseCase) GetPropertyDetails(ctx context.Context, userID, proper
 		}
 	}
 
-	err = u.PropertyRepository.GetPropertyRatings(tx, propertyID, userID, &product.RatingsAndReviews)
+	err = u.PropertyRepository.GetPropertyRatings(tx, propertyID, userID, &product.RatingsAndReviews.Data)
 	if err != nil {
 		u.Log.Warnf("failed to get property ratings: %+v\n", err)
 		return nil, ErrFailedToReadData
 	}
 
-	for i, r := range product.RatingsAndReviews {
+	for i, r := range product.RatingsAndReviews.Data {
 		photoUrlsSlice := strings.Split(r.PhotoUrlsString, ",")
-		product.RatingsAndReviews[i].PhotoUrls = make([]string, len(photoUrlsSlice))
+		product.RatingsAndReviews.Data[i].PhotoUrls = make([]string, len(photoUrlsSlice))
 
 		for j, photo := range photoUrlsSlice {
-			product.RatingsAndReviews[i].PhotoUrls[j] = photo
+			product.RatingsAndReviews.Data[i].PhotoUrls[j] = photo
 		}
 	}
+
+	discountPriceString, err := u.Redis.Get(ctx, fmt.Sprintf("discount_property_id_%s", product.ID)).Result()
+	if err != nil && !errors.Is(err, redis.Nil) {
+		u.Log.Warnf("failed to read discount price: %+v\n", err)
+		return nil, ErrFailedToReadData
+	}
+
+	var discountPrice int
+	if !errors.Is(err, redis.Nil) {
+		discountPrice, err = strconv.Atoi(discountPriceString)
+		if err != nil {
+			return nil, ErrParseStringToNumber
+		}
+	}
+
+	ratingBreakdown := new([]response.RatingBreakdown)
+	err = u.PropertyRepository.RatingBreakdown(tx, propertyID, ratingBreakdown)
+	if err != nil {
+		u.Log.Warnf("failed to get rating breakdown: %+v\n", err)
+		return nil, ErrFailedToReadData
+	}
+
+	product.RatingsAndReviews.CountStarBreakDown = make([]int, 5)
+	for i := 5; i >= 1; i-- {
+		total := 0
+
+		for _, rating := range *ratingBreakdown {
+			if rating.Star == i {
+				total = int(rating.Total)
+				break
+			}
+		}
+
+		product.RatingsAndReviews.CountStarBreakDown[5-i] = total
+	}
+
+	var total int
+	err = u.CartRepository.CountCart(tx, user.ID, &total)
+	if err != nil {
+		u.Log.Warnf("failed to count cart %+v\n", err)
+		return nil, ErrFailedToReadData
+	}
+
+	product.RatingsAndReviews.CountRatings = len(product.RatingsAndReviews.Data)
+	product.DiscountPrice = int64(discountPrice)
+
+	product.UserDetails.IsLoggedIn = user.ID != ""
+	product.UserDetails.CountCarts = total
+	product.UserDetails.PhotoProfile = user.PhotoUrl
 
 	return product, nil
 }

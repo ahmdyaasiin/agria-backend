@@ -1,8 +1,10 @@
 package response
 
 type MyCart struct {
-	AvailableProducts   []CartProducts `json:"available_products"`
-	UnavailableProducts []CartProducts `json:"unavailable_products"`
+	UserDetails         UserDetails    `json:"user_details"`
+	AvailableProducts   []CartProducts `json:"available"`
+	UnavailableProducts []CartProducts `json:"unavailable"`
+	Pagination          Pagination     `json:"pagination"`
 }
 
 type CartProducts struct {

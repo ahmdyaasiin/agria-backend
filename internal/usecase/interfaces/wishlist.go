@@ -8,6 +8,6 @@ import (
 
 type WishlistUseCase interface {
 	//
-	GetAllWishlists(ctx context.Context, userID string) (*[]response.MyWishlist, error)
+	GetAllWishlists(ctx context.Context, userID string) (*response.ProductWishlist, error)
 	ManageWishlist(ctx context.Context, userID string, req *request.ManageWishlist) (*response.ManageWishlist, error)
 }

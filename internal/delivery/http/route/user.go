@@ -46,7 +46,7 @@ func NewUserRoutes(route fiber.Router,
 	property.Put("/wishlist", propertyHandler.ManageWishlistsProperties, authMiddleware)
 	property.Get("/:categoryName?", propertyHandler.GetProperties, optionalAuthMiddleware)
 	property.Get("/:propertyID/details", propertyHandler.GetPropertyDetails, optionalAuthMiddleware)
-	property.Get("/:propertyID/reviews", propertyHandler.GetPropertyReviews, optionalAuthMiddleware)
-	property.Get("/:propertyID/discuss", propertyHandler.GetPropertyDiscuss, optionalAuthMiddleware)
-	property.Post("/:propertyID/discuss", propertyHandler.AddPropertyDiscuss, authMiddleware)
+	//property.Get("/:propertyID/reviews", propertyHandler.GetPropertyReviews, optionalAuthMiddleware)
+	//property.Get("/:propertyID/discuss", propertyHandler.GetPropertyDiscuss, optionalAuthMiddleware)
+	//property.Post("/:propertyID/discuss", propertyHandler.AddPropertyDiscuss, authMiddleware)
 }

@@ -91,3 +91,23 @@ func (r *CartRepository) GetMyCart(tx *sqlx.Tx, userID, productID string, cart *
 
 	return err
 }
+
+func (r *CartRepository) CountCart(tx *sqlx.Tx, userID string, total *int) error {
+	q := QueryGetCountCart
+
+	param := map[string]any{
+		"user_id": userID,
+	}
+
+	stmt, err := tx.PrepareNamed(q)
+	if err != nil {
+		return err
+	}
+
+	err = stmt.Get(total, param)
+	if err != nil {
+		return err
+	}
+
+	return err
+}

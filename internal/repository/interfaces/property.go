@@ -16,4 +16,8 @@ type PropertyRepository interface {
 	GetPropertyDiscuss(tx *sqlx.Tx, propertyID string, discuss *[]response.PropertyDiscuss) error
 
 	GetPropertyRatings(tx *sqlx.Tx, propertyID, userID string, ratings *[]response.RatingProperty) error
+
+	GetState(tx *sqlx.Tx, provinces *[]string) error
+
+	RatingBreakdown(tx *sqlx.Tx, productID string, ratingBreakdown *[]response.RatingBreakdown) error
 }

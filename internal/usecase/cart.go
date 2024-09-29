@@ -22,6 +22,7 @@ type CartUseCase struct {
 	DB             *sqlx.DB
 	Log            *logrus.Logger
 	Redis          *redis.Client
+	UserRepository repositoryInterface.UserRepository
 	CartRepository repositoryInterface.CartRepository
 	ProductUseCase repositoryInterface.ProductRepository
 }
@@ -30,8 +31,9 @@ func NewCartUseCase(DB *sqlx.DB,
 	log *logrus.Logger,
 	redis *redis.Client,
 	cartRepository repositoryInterface.CartRepository,
-	productRepository repositoryInterface.ProductRepository) interfaces.CartUseCase {
-	return &CartUseCase{DB: DB, Log: log, Redis: redis, CartRepository: cartRepository, ProductUseCase: productRepository}
+	productRepository repositoryInterface.ProductRepository,
+	userRepository repositoryInterface.UserRepository) interfaces.CartUseCase {
+	return &CartUseCase{DB: DB, Log: log, Redis: redis, CartRepository: cartRepository, ProductUseCase: productRepository, UserRepository: userRepository}
 }
 
 func (u *CartUseCase) GetMyCart(ctx context.Context, userID string) (*response.MyCart, error) {
@@ -40,6 +42,15 @@ func (u *CartUseCase) GetMyCart(ctx context.Context, userID string) (*response.M
 	if err != nil {
 		u.Log.Warnf("create transaction: %+v\n", err)
 		return nil, ErrCreateDatabaseTransaction
+	}
+
+	user := &domain.User{
+		ID: userID,
+	}
+	err = u.UserRepository.Read(tx, "iD", user)
+	if err != nil {
+		u.Log.Warnf("failed to get user detail: %+v\n", err)
+		return nil, ErrFailedToReadData
 	}
 
 	products := new(response.MyCart)
@@ -98,6 +109,20 @@ func (u *CartUseCase) GetMyCart(ctx context.Context, userID string) (*response.M
 			products.UnavailableProducts[i].DiscountPrice = int64(d)
 		}
 	}
+
+	var total int
+	err = u.CartRepository.CountCart(tx, user.ID, &total)
+	if err != nil {
+		u.Log.Warnf("failed to get total cart: %+v\n", err)
+		return nil, ErrFailedToReadData
+	}
+
+	products.UserDetails.CountCarts = total
+	products.UserDetails.IsLoggedIn = user.ID != ""
+	products.UserDetails.PhotoProfile = user.PhotoUrl
+	products.Pagination.TotalItems = int64(len(products.AvailableProducts)) + int64(len(products.UnavailableProducts))
+	products.Pagination.Page = 1
+	products.Pagination.TotalPages = 1
 
 	return products, nil
 }

@@ -173,3 +173,34 @@ func (r *PropertyRepository) GetPropertyRatings(tx *sqlx.Tx, propertyID, userID 
 
 	return err
 }
+
+func (r *PropertyRepository) GetState(tx *sqlx.Tx, provinces *[]string) error {
+	q := QueryGetProvinces
+
+	err := tx.Select(provinces, q)
+	if err != nil {
+		return err
+	}
+
+	return err
+}
+
+func (r *PropertyRepository) RatingBreakdown(tx *sqlx.Tx, productID string, ratingBreakdown *[]response.RatingBreakdown) error {
+	q := QueryRatingPropertyBreakdown
+
+	param := map[string]any{
+		"property_id": productID,
+	}
+
+	stmt, err := tx.PrepareNamed(q)
+	if err != nil {
+		return err
+	}
+
+	err = stmt.Select(ratingBreakdown, param)
+	if err != nil {
+		return err
+	}
+
+	return err
+}

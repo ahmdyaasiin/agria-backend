@@ -23,18 +23,38 @@ type WishlistUseCase struct {
 	Log                *logrus.Logger
 	Redis              *redis.Client
 	WishlistRepository repositoryInterface.WishlistRepository
+	UserRepository     repositoryInterface.UserRepository
+	CartRepository     repositoryInterface.CartRepository
 }
 
-func NewWishlistUseCase(DB *sqlx.DB, log *logrus.Logger, redis *redis.Client, wishlistRepository repositoryInterface.WishlistRepository) interfaces.WishlistUseCase {
-	return &WishlistUseCase{DB: DB, Log: log, Redis: redis, WishlistRepository: wishlistRepository}
+func NewWishlistUseCase(DB *sqlx.DB, log *logrus.Logger, redis *redis.Client, wishlistRepository repositoryInterface.WishlistRepository, userRepository repositoryInterface.UserRepository, cartRepository repositoryInterface.CartRepository) interfaces.WishlistUseCase {
+	return &WishlistUseCase{DB: DB, Log: log, Redis: redis, WishlistRepository: wishlistRepository, UserRepository: userRepository, CartRepository: cartRepository}
 }
 
-func (u *WishlistUseCase) GetAllWishlists(ctx context.Context, userID string) (*[]response.MyWishlist, error) {
+func (u *WishlistUseCase) GetAllWishlists(ctx context.Context, userID string) (*response.ProductWishlist, error) {
 	tx, err := u.DB.Beginx()
 	defer tx.Rollback()
 	if err != nil {
 		u.Log.Warnf("create transaction: %+v\n", err)
 		return nil, ErrCreateDatabaseTransaction
+	}
+
+	res := new(response.ProductWishlist)
+
+	user := &domain.User{
+		ID: userID,
+	}
+	err = u.UserRepository.Read(tx, "iD", user)
+	if err != nil {
+		u.Log.Warnf("failed to get user details: %+v\n", err)
+		return nil, ErrFailedToReadData
+	}
+
+	var total int
+	err = u.CartRepository.CountCart(tx, user.ID, &total)
+	if err != nil {
+		u.Log.Warnf("failed to get count error: %+v\n", err)
+		return nil, ErrFailedToReadData
 	}
 
 	wishlists := new([]response.MyWishlist)
@@ -66,7 +86,15 @@ func (u *WishlistUseCase) GetAllWishlists(ctx context.Context, userID string) (*
 		}
 	}
 
-	return wishlists, nil
+	res.UserDetails.CountCarts = total
+	res.UserDetails.IsLoggedIn = user.ID != ""
+	res.UserDetails.PhotoProfile = user.PhotoUrl
+	res.Products = *wishlists
+	res.Pagination.TotalItems = int64(len(*wishlists))
+	res.Pagination.Page = 1
+	res.Pagination.TotalPages = 1
+
+	return res, nil
 }
 
 func (u *WishlistUseCase) ManageWishlist(ctx context.Context, userID string, req *request.ManageWishlist) (*response.ManageWishlist, error) {

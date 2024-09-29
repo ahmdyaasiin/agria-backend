@@ -28,6 +28,8 @@ type ProductUseCase struct {
 	ProductRepository      repositoryInterface.ProductRepository
 	ProductMediaRepository repositoryInterface.ProductMediaRepository
 	RatingRepository       repositoryInterface.RatingRepository
+	CartRepository         repositoryInterface.CartRepository
+	UserRepository         repositoryInterface.UserRepository
 }
 
 func NewProductUseCase(DB *sqlx.DB,
@@ -36,7 +38,9 @@ func NewProductUseCase(DB *sqlx.DB,
 	addressRepository repositoryInterface.AddressRepository,
 	productRepository repositoryInterface.ProductRepository,
 	productMediaRepository repositoryInterface.ProductMediaRepository,
-	ratingRepository repositoryInterface.RatingRepository) interfaces.ProductUseCase {
+	ratingRepository repositoryInterface.RatingRepository,
+	cartRepository repositoryInterface.CartRepository,
+	userRepository repositoryInterface.UserRepository) interfaces.ProductUseCase {
 	return &ProductUseCase{
 		DB:                     DB,
 		Log:                    log,
@@ -45,6 +49,8 @@ func NewProductUseCase(DB *sqlx.DB,
 		ProductRepository:      productRepository,
 		ProductMediaRepository: productMediaRepository,
 		RatingRepository:       ratingRepository,
+		CartRepository:         cartRepository,
+		UserRepository:         userRepository,
 	}
 }
 
@@ -54,6 +60,15 @@ func (u *ProductUseCase) GetProducts(ctx context.Context, userID, categoryName, 
 	if err != nil {
 		u.Log.Warnf("create transaction: %+v\n", err)
 		return nil, ErrCreateDatabaseTransaction
+	}
+
+	user := &domain.User{
+		ID: userID,
+	}
+	err = u.UserRepository.Read(tx, "iD", user)
+	if err != nil {
+		u.Log.Warnf("failed to get user details: %+v\n", err)
+		return nil, ErrFailedToReadData
 	}
 
 	ids, err := u.Redis.Keys(ctx, "discount_product_id_*").Result()
@@ -80,6 +95,17 @@ func (u *ProductUseCase) GetProducts(ctx context.Context, userID, categoryName, 
 		return nil, ErrFailedToReadData
 	}
 
+	var total int
+	err = u.CartRepository.CountCart(tx, user.ID, &total)
+	if err != nil {
+		u.Log.Warnf("failed to get count cart: %+v\n", err)
+		return nil, ErrFailedToReadData
+	}
+
+	res.UserDetails.CountCarts = total
+	res.UserDetails.IsLoggedIn = user.ID != ""
+	res.UserDetails.PhotoProfile = user.PhotoUrl
+
 	res.Page = page
 	res.TotalItems = int64(len(res.Products))
 	res.TotalPages = int64(math.Ceil(float64(res.TotalItems) / 24))
@@ -93,6 +119,15 @@ func (u *ProductUseCase) GetProductDetails(ctx context.Context, userID, productI
 	if err != nil {
 		u.Log.Warnf("create transaction: %+v\n", err)
 		return nil, ErrCreateDatabaseTransaction
+	}
+
+	user := &domain.User{
+		ID: userID,
+	}
+	err = u.UserRepository.Read(tx, "iD", user)
+	if err != nil {
+		u.Log.Warnf("failed to get user details: %+v\n", err)
+		return nil, ErrFailedToReadData
 	}
 
 	product := new(response.GetProductDetails)
@@ -118,6 +153,29 @@ func (u *ProductUseCase) GetProductDetails(ctx context.Context, userID, productI
 		photoUrls := strings.Split(r.PhotoReviewUrlsString, ",")
 		product.Reviews[i].PhotoReviewUrls = photoUrls
 	}
+
+	ratingBreakdown := new([]response.RatingBreakdown)
+	err = u.RatingRepository.RatingBreakdown(tx, productID, ratingBreakdown)
+	if err != nil {
+		u.Log.Warnf("failed to get rating breakdown: %+v\n", err)
+		return nil, ErrFailedToReadData
+	}
+
+	product.RatingBreakdown = make([]int64, 5)
+	for i := 5; i >= 1; i-- {
+		total := int64(0)
+
+		for _, rating := range *ratingBreakdown {
+			if rating.Star == i {
+				total = rating.Total
+				break
+			}
+		}
+
+		product.RatingBreakdown[5-i] = total
+	}
+
+	product.RatingsAndReviews.CountStarBreakdown = product.RatingBreakdown
 
 	// set default to rektorat ub wkwk
 	latitude, longitude := -6.213231948641893, 106.79724408707149
@@ -177,6 +235,20 @@ func (u *ProductUseCase) GetProductDetails(ctx context.Context, userID, productI
 		}
 	}
 
+	var total int
+	err = u.CartRepository.CountCart(tx, userID, &total)
+	if err != nil {
+		u.Log.Warnf("failed to count cart: %+v\n", err)
+		return nil, ErrFailedToReadData
+	}
+
+	product.RatingsAndReviews.Rating = product.Ratings
+	product.RatingsAndReviews.CountRatings = int(product.ReviewsCount)
+	product.RatingsAndReviews.Data = product.Reviews
+
+	product.UserDetails.CountCarts = total
+	product.UserDetails.IsLoggedIn = user.ID != ""
+	product.UserDetails.PhotoProfile = user.PhotoUrl
 	product.PriceRange = res.CostRange
 	product.TimeRange = res.EstimatedArrived
 
@@ -189,6 +261,15 @@ func (u *ProductUseCase) GetProductReviews(ctx context.Context, userID, productI
 	if err != nil {
 		u.Log.Warnf("create transaction: %+v\n", err)
 		return nil, ErrCreateDatabaseTransaction
+	}
+
+	user := &domain.User{
+		ID: userID,
+	}
+	err = u.UserRepository.Read(tx, "iD", user)
+	if err != nil {
+		u.Log.Warnf("failed to read data user details: %+v\n", err)
+		return nil, ErrFailedToReadData
 	}
 
 	res := new(response.ReviewDetails)
@@ -219,9 +300,30 @@ func (u *ProductUseCase) GetProductReviews(ctx context.Context, userID, productI
 		res.RatingBreakdown[5-i] = total
 	}
 
-	res.Page = page
-	res.TotalItems = int64(len(res.Reviews))
-	res.TotalPages = int64(math.Ceil(float64(res.TotalItems) / 5))
+	for i, photos := range res.Reviews {
+
+		ppSlice := strings.Split(photos.PhotoReviewUrlsString, ",")
+		res.Reviews[i].PhotoReviewUrls = make([]string, len(ppSlice))
+
+		for j, p := range ppSlice {
+			res.Reviews[i].PhotoReviewUrls[j] = p
+		}
+	}
+
+	var total int
+	err = u.CartRepository.CountCart(tx, user.ID, &total)
+	if err != nil {
+		u.Log.Warnf("failed to count cart: %+v\n", err)
+		return nil, ErrFailedToReadData
+	}
+
+	res.UserDetails.CountCarts = total
+	res.UserDetails.IsLoggedIn = user.ID != ""
+	res.UserDetails.PhotoProfile = user.PhotoUrl
+	res.CountRatings = len(res.Reviews)
+	res.Pagination.Page = page
+	res.Pagination.TotalItems = int64(len(res.Reviews))
+	res.Pagination.TotalPages = int64(math.Ceil(float64(res.Pagination.TotalItems) / 5))
 
 	return res, nil
 }
