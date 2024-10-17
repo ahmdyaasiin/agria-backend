@@ -15,7 +15,7 @@ func NewPropertyRepository(DB *sqlx.DB) interfaces.PropertyRepository {
 	return &PropertyRepository{DB: DB}
 }
 
-func (r *PropertyRepository) GetAllPropertiesWithoutPromo(tx *sqlx.Tx, categoryName, userID, sortBy, notIN, province string, page int, properties *[]response.GetProperties) error {
+func (r *PropertyRepository) GetAllPropertiesWithoutPromo(tx *sqlx.Tx, categoryName, userID, sortBy, notIN, province string, page, limit int, properties *[]response.GetProperties) error {
 	q := QueryGetAllPropertiesWithoutCondition1
 	param := map[string]any{}
 
@@ -53,9 +53,9 @@ func (r *PropertyRepository) GetAllPropertiesWithoutPromo(tx *sqlx.Tx, categoryN
 		q += ", p.created_at ORDER BY p.created_at DESC"
 	}
 
-	if page != 0 {
-		q += fmt.Sprintf(" LIMIT %d, 5", (page-1)*5)
-	}
+	q += fmt.Sprintf(" LIMIT %d, %d", (page-1)*5, limit)
+
+	fmt.Println(q)
 
 	stmt, err := tx.PrepareNamed(q)
 	if err != nil {

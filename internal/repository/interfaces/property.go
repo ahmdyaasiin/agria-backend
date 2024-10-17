@@ -7,7 +7,7 @@ import (
 
 type PropertyRepository interface {
 	//
-	GetAllPropertiesWithoutPromo(tx *sqlx.Tx, categoryName, userID, sortBy, notIN, province string, page int, properties *[]response.GetProperties) error
+	GetAllPropertiesWithoutPromo(tx *sqlx.Tx, categoryName, userID, sortBy, notIN, province string, page, limit int, properties *[]response.GetProperties) error
 	GetPropertyDetails(tx *sqlx.Tx, propertyID, userID string, property *response.GetPropertyDetails) error
 
 	GetPropertyHighlights(tx *sqlx.Tx, propertyID string, highlights *[]response.PropertyHighlights) error

@@ -26,6 +26,7 @@ type GetProperties struct {
 	CategoryName      string  `json:"category_name" db:"category_name"`
 	City              string  `json:"city" db:"city"`
 	Price             int64   `json:"price" db:"price"`
+	DiscountPrice     int64   `json:"discount_price"`
 	Width             int     `json:"width" db:"width"`
 	CertificationType string  `json:"ownership_type" db:"certification_type"`
 	PhotoUrl          string  `json:"photo_url" db:"photo_url"`
@@ -48,7 +49,7 @@ type GetProduct struct {
 	Description          string `json:"-" db:"description"`
 	Quantity             uint   `json:"-" db:"quantity"`
 	UnitWeight           int32  `json:"-" db:"unit_weight"`
-	ShelfLife            int32  `json:"-" db:"shelf_life"`
+	ShelfLife            string `json:"-" db:"shelf_life"`
 	OrganicCertification string `json:"-" db:"organic_certification"`
 	CreatedAt            int64  `json:"-" db:"created_at"`
 	UpdatedAt            int64  `json:"-" db:"updated_at"`
@@ -67,7 +68,7 @@ type GetProductDetails struct {
 	Quantity             uint        `json:"stock" db:"quantity"`
 	CategoryName         string      `json:"category_name" db:"category_name"`
 	UnitWeight           int32       `json:"weight" db:"unit_weight"`
-	ShelfLife            int32       `json:"shelf_life" db:"shelf_life"`
+	ShelfLife            string      `json:"shelf_life" db:"shelf_life"`
 	OrganicCertification string      `json:"organic_certification" db:"organic_certification"`
 	Description          string      `json:"description"`
 	TimeRange            string      `json:"delivery_days_range"`

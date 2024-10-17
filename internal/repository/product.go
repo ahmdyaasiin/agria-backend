@@ -59,7 +59,7 @@ func (r *ProductRepository) Delete(tx *sqlx.Tx, product *domain.Product) error {
 	return err
 }
 
-func (r *ProductRepository) GetAllProductsWithoutPromo(tx *sqlx.Tx, categoryName, userID, sortBy, notIN string, page int, product *[]response.GetProduct) error {
+func (r *ProductRepository) GetAllProductsWithoutPromo(tx *sqlx.Tx, categoryName, userID, sortBy, notIN string, page, limit int, product *[]response.GetProduct) error {
 	q := QueryGetAllProductsWithoutCondition1
 	param := map[string]any{}
 
@@ -88,9 +88,9 @@ func (r *ProductRepository) GetAllProductsWithoutPromo(tx *sqlx.Tx, categoryName
 		q += ", p.created_at ORDER BY p.created_at DESC"
 	}
 
-	if page != 0 {
-		q += fmt.Sprintf(" LIMIT %d, 24", (page-1)*5)
-	}
+	q += fmt.Sprintf(" LIMIT %d, %d", (page-1)*5, limit)
+
+	fmt.Println(q)
 
 	stmt, err := tx.PrepareNamed(q)
 	if err != nil {
@@ -163,6 +163,8 @@ func (r *ProductRepository) GetDetailsProduct(tx *sqlx.Tx, productID, userID str
 	}
 
 	q += QueryGetDetailsProduct2
+
+	fmt.Println(q)
 
 	stmt, err := tx.PrepareNamed(q)
 	if err != nil {

@@ -65,5 +65,40 @@ func (h *MenuHandler) GetMarket(ctx fiber.Ctx) error {
 }
 
 func (h *MenuHandler) GetEducation(ctx fiber.Ctx) error {
-	return nil
+	auth := middleware.GetUserID(ctx)
+
+	res, err := h.MenuUseCase.Education(ctx.Context(), auth)
+	if err != nil {
+		return err
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(response.Final{
+		Message: "Get homepage successfully",
+		Data:    res,
+		Errors:  nil,
+		Status: response.Status{
+			Code:    fiber.StatusOK,
+			Message: http.StatusText(fiber.StatusOK),
+		},
+	})
+}
+
+func (h *MenuHandler) GetEducationDetails(ctx fiber.Ctx) error {
+	auth := middleware.GetUserID(ctx)
+
+	educationID := ctx.Params("educationID")
+	res, err := h.MenuUseCase.EducationDetails(ctx.Context(), auth, educationID)
+	if err != nil {
+		return err
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(response.Final{
+		Message: "Get education details successfully",
+		Data:    res,
+		Errors:  nil,
+		Status: response.Status{
+			Code:    fiber.StatusOK,
+			Message: http.StatusText(fiber.StatusOK),
+		},
+	})
 }

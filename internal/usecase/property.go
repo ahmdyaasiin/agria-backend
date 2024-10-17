@@ -197,7 +197,7 @@ func (u *PropertyUseCase) GetProperties(ctx context.Context, userID, categoryNam
 	notIN := fmt.Sprintf("(%s)", strings.Join(uuids, ","))
 
 	res := new(response.GetPropertiesWithPagination)
-	err = u.PropertyRepository.GetAllPropertiesWithoutPromo(tx, categoryName, userID, sortBy, notIN, province, page, &res.Properties.Data)
+	err = u.PropertyRepository.GetAllPropertiesWithoutPromo(tx, categoryName, userID, sortBy, notIN, province, page, 24, &res.Properties.Data)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		u.Log.Warnf("failed to get products: %+v\n", err)
 		return nil, ErrFailedToReadData

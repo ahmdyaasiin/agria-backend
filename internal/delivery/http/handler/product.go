@@ -31,7 +31,7 @@ func (h *ProductHandler) GetProducts(ctx fiber.Ctx) error {
 	auth := middleware.GetUserID(ctx)
 	category := ctx.Params("categoryName")
 	sortBy := ctx.Query("sortBy", "newest")
-	pageString := ctx.Query("page", "0")
+	pageString := ctx.Query("page", "1")
 
 	page, err := strconv.Atoi(pageString)
 	if err != nil {

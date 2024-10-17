@@ -45,6 +45,8 @@ func (r *RatingRepository) GetProductReviews(tx *sqlx.Tx, productID, userID, sor
 		q += fmt.Sprintf(" LIMIT %d, 5", (page-1)*5)
 	}
 
+	fmt.Println(q)
+
 	stmt, err := tx.PrepareNamed(q)
 	if err != nil {
 		return err

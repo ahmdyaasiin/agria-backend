@@ -54,5 +54,8 @@ func NewUserRoutes(route fiber.Router,
 	menu := route.Group("/menu")
 	menu.Get("/homepage", menuHandler.GetHomepage, optionalAuthMiddleware)
 	menu.Get("/market", menuHandler.GetMarket, optionalAuthMiddleware)
-	menu.Get("/education", menuHandler.GetEducation)
+	menu.Get("/education", menuHandler.GetEducation, optionalAuthMiddleware)
+
+	education := route.Group("/education")
+	education.Get("/:educationID/details", menuHandler.GetEducationDetails, optionalAuthMiddleware)
 }

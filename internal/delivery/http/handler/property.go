@@ -77,7 +77,7 @@ func (h *PropertyHandler) GetProperties(ctx fiber.Ctx) error {
 	auth := middleware.GetUserID(ctx)
 	category := ctx.Params("categoryName")
 	sortBy := ctx.Query("sortBy", "newest")
-	pageString := ctx.Query("page", "0")
+	pageString := ctx.Query("page", "1")
 	province := ctx.Query("province", "all")
 
 	page, err := strconv.Atoi(pageString)

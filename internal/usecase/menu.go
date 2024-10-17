@@ -12,7 +12,10 @@ import (
 	"github.com/go-redis/redis/v8"
 	"github.com/jmoiron/sqlx"
 	"github.com/sirupsen/logrus"
+	"math"
+	"strconv"
 	"strings"
+	"time"
 )
 
 type MenuUseCase struct {
@@ -58,7 +61,7 @@ func (u *MenuUseCase) Homepage(ctx context.Context, userID string) (*response.Ho
 		return nil, ErrFailedToReadData
 	}
 
-	ttlProperty, err := u.Redis.TTL(ctx, "promo_products").Result()
+	ttlProperty, err := u.Redis.TTL(ctx, "promo_property").Result()
 	if err != nil {
 		u.Log.Warnf("failed to get expired property: %+v\n", err)
 		return nil, ErrFailedToReadData
@@ -81,7 +84,7 @@ func (u *MenuUseCase) Homepage(ctx context.Context, userID string) (*response.Ho
 
 	notIN := fmt.Sprintf("(%s)", strings.Join(uuids, ","))
 
-	err = u.PropertyRepository.GetAllPropertiesWithoutPromo(tx, "", user.ID, "newest", notIN, "all", 0, &res.Properties.Data)
+	err = u.PropertyRepository.GetAllPropertiesWithoutPromo(tx, "", user.ID, "newest", notIN, "all", 1, 6, &res.Properties.Data)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		u.Log.Warnf("failed to get products: %+v\n", err)
 		return nil, ErrFailedToReadData
@@ -91,6 +94,29 @@ func (u *MenuUseCase) Homepage(ctx context.Context, userID string) (*response.Ho
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		u.Log.Warnf("failed to get products: %+v\n", err)
 		return nil, ErrFailedToReadData
+	}
+
+	var redisKeys []string
+	for _, product := range res.PropertyPromo.Properties {
+		redisKey := fmt.Sprintf("discount_property_id_%s", product.ID)
+		redisKeys = append(redisKeys, redisKey)
+	}
+
+	discounts, err := u.Redis.MGet(ctx, redisKeys...).Result()
+	if err != nil {
+		u.Log.Warnf("failed to get discount price: %+v\n", err.Error())
+		return nil, ErrFailedToReadData
+	}
+
+	for i, discount := range discounts {
+		d, err := strconv.Atoi(discount.(string))
+		if err != nil {
+			continue
+		}
+
+		if discount != nil {
+			res.PropertyPromo.Properties[i].DiscountPrice = int64(d)
+		}
 	}
 
 	ids, err = u.Redis.Keys(ctx, "discount_product_id_*").Result()
@@ -109,7 +135,7 @@ func (u *MenuUseCase) Homepage(ctx context.Context, userID string) (*response.Ho
 
 	notIN = fmt.Sprintf("(%s)", strings.Join(uuids, ","))
 
-	err = u.ProductRepository.GetAllProductsWithoutPromo(tx, "", user.ID, "newest", notIN, 0, &res.Products)
+	err = u.ProductRepository.GetAllProductsWithoutPromo(tx, "", user.ID, "newest", notIN, 1, 6, &res.Products)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		u.Log.Warnf("failed to get products: %+v\n", err)
 		return nil, ErrFailedToReadData
@@ -119,6 +145,29 @@ func (u *MenuUseCase) Homepage(ctx context.Context, userID string) (*response.Ho
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		u.Log.Warnf("failed to get products: %+v\n", err)
 		return nil, ErrFailedToReadData
+	}
+
+	redisKeys = []string{}
+	for _, product := range res.ProductsPromo.Products {
+		redisKey := fmt.Sprintf("discount_product_id_%s", product.ID)
+		redisKeys = append(redisKeys, redisKey)
+	}
+
+	discounts, err = u.Redis.MGet(ctx, redisKeys...).Result()
+	if err != nil {
+		u.Log.Warnf("failed to get discount price (product): %+v\n", err.Error())
+		return nil, ErrFailedToReadData
+	}
+
+	for i, discount := range discounts {
+		d, err := strconv.Atoi(discount.(string))
+		if err != nil {
+			continue
+		}
+
+		if discount != nil {
+			res.ProductsPromo.Products[i].DiscountPrice = int64(d)
+		}
 	}
 
 	var total int
@@ -132,6 +181,13 @@ func (u *MenuUseCase) Homepage(ctx context.Context, userID string) (*response.Ho
 	if err != nil {
 		u.Log.Warnf("failed to get educations: %+v\n", err)
 		return nil, ErrFailedToReadData
+	}
+
+	for i, e := range res.Educations {
+		t := time.Unix(0, e.CreatedAt)
+		f := t.Format("2 January 2006")
+
+		res.Educations[i].CreatedAtString = f
 	}
 
 	res.UserDetails.CountCarts = total
@@ -193,16 +249,39 @@ func (u *MenuUseCase) Market(ctx context.Context, userID string) (*response.Mark
 
 	notIN := fmt.Sprintf("(%s)", strings.Join(uuids, ","))
 
-	err = u.PropertyRepository.GetAllPropertiesWithoutPromo(tx, "", user.ID, "newest", notIN, "all", 0, &res.Properties.Data)
+	err = u.PropertyRepository.GetAllPropertiesWithoutPromo(tx, "", user.ID, "newest", notIN, "all", 1, 18, &res.Properties.Data)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
-		u.Log.Warnf("failed to get products: %+v\n", err)
+		u.Log.Warnf("failed to get products22: %+v\n", err)
 		return nil, ErrFailedToReadData
 	}
 
 	err = u.PropertyRepository.GetAllPropertiesWithPromo(tx, "", user.ID, "newest", notIN, "all", 0, &res.PropertyPromo.Properties)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
-		u.Log.Warnf("failed to get products: %+v\n", err)
+		u.Log.Warnf("failed to get products2: %+v\n", err)
 		return nil, ErrFailedToReadData
+	}
+
+	var redisKeys []string
+	for _, product := range res.PropertyPromo.Properties {
+		redisKey := fmt.Sprintf("discount_property_id_%s", product.ID)
+		redisKeys = append(redisKeys, redisKey)
+	}
+
+	discounts, err := u.Redis.MGet(ctx, redisKeys...).Result()
+	if err != nil {
+		u.Log.Warnf("failed to get discount price: %+v\n", err.Error())
+		return nil, ErrFailedToReadData
+	}
+
+	for i, discount := range discounts {
+		d, err := strconv.Atoi(discount.(string))
+		if err != nil {
+			continue
+		}
+
+		if discount != nil {
+			res.PropertyPromo.Properties[i].DiscountPrice = int64(d)
+		}
 	}
 
 	ids, err = u.Redis.Keys(ctx, "discount_product_id_*").Result()
@@ -221,16 +300,39 @@ func (u *MenuUseCase) Market(ctx context.Context, userID string) (*response.Mark
 
 	notIN = fmt.Sprintf("(%s)", strings.Join(uuids, ","))
 
-	err = u.ProductRepository.GetAllProductsWithoutPromo(tx, "", user.ID, "newest", notIN, 0, &res.Products.Products)
+	err = u.ProductRepository.GetAllProductsWithoutPromo(tx, "", user.ID, "newest", notIN, 1, 18, &res.Products.Products)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
-		u.Log.Warnf("failed to get products: %+v\n", err)
+		u.Log.Warnf("failed to get products1: %+v\n", err)
 		return nil, ErrFailedToReadData
 	}
 
 	err = u.ProductRepository.GetAllProductsWithPromo(tx, "", user.ID, "newest", notIN, 0, &res.ProductsPromo.Products)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
-		u.Log.Warnf("failed to get products: %+v\n", err)
+		u.Log.Warnf("failed to get products3: %+v\n", err)
 		return nil, ErrFailedToReadData
+	}
+
+	redisKeys = []string{}
+	for _, product := range res.ProductsPromo.Products {
+		redisKey := fmt.Sprintf("discount_product_id_%s", product.ID)
+		redisKeys = append(redisKeys, redisKey)
+	}
+
+	discounts, err = u.Redis.MGet(ctx, redisKeys...).Result()
+	if err != nil {
+		u.Log.Warnf("failed to get discount price (product): %+v\n", err.Error())
+		return nil, ErrFailedToReadData
+	}
+
+	for i, discount := range discounts {
+		d, err := strconv.Atoi(discount.(string))
+		if err != nil {
+			continue
+		}
+
+		if discount != nil {
+			res.ProductsPromo.Products[i].DiscountPrice = int64(d)
+		}
 	}
 
 	var total int
@@ -247,11 +349,11 @@ func (u *MenuUseCase) Market(ctx context.Context, userID string) (*response.Mark
 		return nil, ErrFailedToReadData
 	}
 
-	res.Properties.Pagination.Page = 0
+	res.Properties.Pagination.Page = 1
 	res.Properties.Pagination.TotalItems = int64(len(res.Properties.Data))
 	res.Properties.Pagination.TotalPages = 1
 
-	res.Products.Pagination.Page = 0
+	res.Products.Pagination.Page = 1
 	res.Products.Pagination.TotalItems = int64(len(res.Products.Products))
 	res.Products.Pagination.TotalPages = 1
 
@@ -259,6 +361,148 @@ func (u *MenuUseCase) Market(ctx context.Context, userID string) (*response.Mark
 	res.Properties.Provinces = provinces
 	res.ProductsPromo.TimeLifeInSeconds = int64(ttlProducts.Seconds()) % 86400
 	res.PropertyPromo.TimeLifeInSeconds = int64(ttlProperty.Seconds()) % 86400
+
+	res.UserDetails.CountCarts = total
+	res.UserDetails.IsLoggedIn = user.ID != ""
+	res.UserDetails.PhotoProfile = user.PhotoUrl
+
+	return res, nil
+}
+
+func (u *MenuUseCase) Education(ctx context.Context, userID string) (*response.Education, error) {
+	tx, err := u.DB.Beginx()
+	defer tx.Rollback()
+	if err != nil {
+		u.Log.Warnf("create transaction: %+v\n", err)
+		return nil, ErrCreateDatabaseTransaction
+	}
+
+	res := new(response.Education)
+
+	user := &domain.User{
+		ID: userID,
+	}
+	err = u.UserRepository.Read(tx, "iD", user)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		u.Log.Warnf("failed to get user detail: %+v\n", err)
+		return nil, ErrFailedToReadData
+	}
+
+	idMainArticle, err := u.Redis.Get(ctx, "education_main_article").Result()
+	if err != nil && !errors.Is(err, redis.Nil) {
+		u.Log.Warnf("failed to get data from redis: %+v\n", err)
+		return nil, ErrFailedToReadData
+	}
+
+	err = u.EducationRepository.MainArticle(tx, idMainArticle, &res.MainArticle)
+	if err != nil {
+		u.Log.Warnf("failed to get data (main article): %+v\n", err)
+		return nil, ErrFailedToReadData
+	}
+
+	t := time.Unix(0, res.MainArticle.CreatedAt)
+	f := t.Format("2 January 2006")
+
+	res.MainArticle.CreatedAtString = f
+
+	idMustRead, err := u.Redis.Get(ctx, "education_must_read").Result()
+	if err != nil && !errors.Is(err, redis.Nil) {
+		u.Log.Warnf("failed to get data from redis (must read): %+v\n", err)
+		return nil, ErrFailedToReadData
+	}
+
+	var ids []string
+	idsMustRead := strings.Split(idMustRead, ",")
+	for _, id := range idsMustRead {
+
+		ids = append(ids, fmt.Sprintf("'%s'", id))
+	}
+
+	err = u.EducationRepository.MustRead(tx, strings.Join(ids, ","), &res.MustRead)
+	if err != nil {
+		u.Log.Warnf("failed to get data (must read): %+v\n", err)
+		return nil, ErrFailedToReadData
+	}
+
+	for i, e := range res.MustRead {
+		t := time.Unix(0, e.CreatedAt)
+		f := t.Format("2 January 2006")
+
+		res.MustRead[i].CreatedAtString = f
+	}
+
+	ids = append(ids, fmt.Sprintf("'%s'", idMainArticle))
+
+	err = u.EducationRepository.Latest(tx, strings.Join(ids, ","), &res.Latest)
+	if err != nil {
+		u.Log.Warnf("failed to get data (latest): %+v\n", err)
+		return nil, ErrFailedToReadData
+	}
+
+	ids = []string{}
+	for _, e := range res.Latest {
+		ids = append(ids, fmt.Sprintf("'%s'", e.ID))
+	}
+
+	err = u.EducationRepository.ExceptionWithRandom(tx, strings.Join(ids, ","), &res.DiscoverMore.Data)
+	if err != nil {
+		u.Log.Warnf("failed to get data (discover more): %+v\n", err)
+		return nil, ErrFailedToReadData
+	}
+
+	res.DiscoverMore.Pagination.Page = 1
+	res.DiscoverMore.Pagination.TotalItems = int64(len(res.DiscoverMore.Data))
+	res.DiscoverMore.Pagination.TotalPages = int64(math.Ceil(float64(res.DiscoverMore.Pagination.TotalItems / 6)))
+
+	return res, nil
+}
+
+func (u *MenuUseCase) EducationDetails(ctx context.Context, userID, educationID string) (*response.EducationDetails, error) {
+	tx, err := u.DB.Beginx()
+	defer tx.Rollback()
+	if err != nil {
+		u.Log.Warnf("create transaction: %+v\n", err)
+		return nil, ErrCreateDatabaseTransaction
+	}
+
+	res := new(response.EducationDetails)
+
+	user := &domain.User{
+		ID: userID,
+	}
+	err = u.UserRepository.Read(tx, "iD", user)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		u.Log.Warnf("failed to get user detail: %+v\n", err)
+		return nil, ErrFailedToReadData
+	}
+
+	var total int
+	err = u.CartRepository.CountCart(tx, user.ID, &total)
+	if err != nil {
+		u.Log.Warnf("failed to count cart: %+v\n", err)
+		return nil, ErrFailedToReadData
+	}
+
+	err = u.EducationRepository.EducationDetails(tx, educationID, &res.Data)
+	if err != nil {
+		u.Log.Warnf("failed to get education details: %+v\n", err)
+		return nil, ErrFailedToReadData
+	}
+
+	err = u.EducationRepository.ExceptionWithRandom(tx, "'as'", &res.RelatedArticle.Data)
+	if err != nil {
+		u.Log.Warnf("failed to related articles: %+v\n", err)
+		return nil, ErrFailedToReadData
+	}
+
+	t := time.Unix(0, res.Data.CreatedAt)
+	f := t.Format("2 January 2006")
+
+	res.Data.CreatedAtString = f
+
+	res.RelatedArticle.Pagination.Page = 1
+	res.RelatedArticle.Pagination.TotalItems = int64(len(res.RelatedArticle.Data))
+	res.RelatedArticle.Pagination.TotalPages = int64(math.Ceil(float64(res.RelatedArticle.Pagination.TotalItems / 4)))
 
 	res.UserDetails.CountCarts = total
 	res.UserDetails.IsLoggedIn = user.ID != ""

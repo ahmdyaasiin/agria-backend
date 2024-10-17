@@ -89,7 +89,7 @@ func (u *ProductUseCase) GetProducts(ctx context.Context, userID, categoryName, 
 	notIN := fmt.Sprintf("(%s)", strings.Join(uuids, ","))
 
 	res := new(response.GetProductWithPagination)
-	err = u.ProductRepository.GetAllProductsWithoutPromo(tx, categoryName, userID, sortBy, notIN, page, &res.Products)
+	err = u.ProductRepository.GetAllProductsWithoutPromo(tx, categoryName, userID, sortBy, notIN, page, 24, &res.Products)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		u.Log.Warnf("failed to get products: %+v\n", err)
 		return nil, ErrFailedToReadData
@@ -150,6 +150,10 @@ func (u *ProductUseCase) GetProductDetails(ctx context.Context, userID, productI
 	}
 
 	for i, r := range product.Reviews {
+		if r.PhotoReviewUrlsString == "" {
+			continue
+		}
+
 		photoUrls := strings.Split(r.PhotoReviewUrlsString, ",")
 		product.Reviews[i].PhotoReviewUrls = photoUrls
 	}
