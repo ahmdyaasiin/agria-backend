@@ -440,7 +440,12 @@ func (u *MenuUseCase) Education(ctx context.Context, userID string) (*response.E
 	}
 
 	ids = []string{}
-	for _, e := range res.Latest {
+	for i, e := range res.Latest {
+		t := time.Unix(0, e.CreatedAt)
+		f := t.Format("2 January 2006")
+
+		res.Latest[i].CreatedAtString = f
+
 		ids = append(ids, fmt.Sprintf("'%s'", e.ID))
 	}
 
