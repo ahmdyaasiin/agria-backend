@@ -455,6 +455,13 @@ func (u *MenuUseCase) Education(ctx context.Context, userID string) (*response.E
 		return nil, ErrFailedToReadData
 	}
 
+	for i, e := range res.DiscoverMore.Data {
+		t := time.Unix(0, e.CreatedAt)
+		f := t.Format("2 January 2006")
+
+		res.DiscoverMore.Data[i].CreatedAtString = f
+	}
+
 	res.DiscoverMore.Pagination.Page = 1
 	res.DiscoverMore.Pagination.TotalItems = int64(len(res.DiscoverMore.Data))
 	res.DiscoverMore.Pagination.TotalPages = int64(math.Ceil(float64(res.DiscoverMore.Pagination.TotalItems / 6)))
